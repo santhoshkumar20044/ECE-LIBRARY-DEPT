@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE Department Library</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --success: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--light);
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .logo span {
+            color: #f1c40f;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 25px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover, nav a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Hidden Admin Link Container */
+        .admin-access-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+
+        .admin-trigger {
+            background: rgba(52, 152, 219, 0.1);
+            border: 2px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .admin-trigger:hover {
+            background: rgba(52, 152, 219, 0.2);
+            transform: scale(1.1);
+        }
+
+        .admin-trigger i {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+
+        .admin-code-input {
+            display: none;
+            position: absolute;
+            bottom: 60px;
+            right: 0;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            min-width: 250px;
+        }
+
+        .admin-code-input.active {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .code-input-group {
+            margin-bottom: 15px;
+        }
+
+        .code-input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--dark);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .code-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        /* Scrolling Message */
+        .scrolling-message {
+            background: var(--accent);
+            color: white;
+            padding: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .message-container {
+            display: flex;
+            animation: scrollText 25s linear infinite;
+            white-space: nowrap;
+        }
+
+        .message-container p {
+            margin-right: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        @keyframes scrollText {
+            from { transform: translateX(100%); }
+            to { transform: translateX(-100%); }
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0,0,0,0.12);
+        }
+
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 i {
+            color: var(--secondary);
+        }
+
+        /* Welcome Message */
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .welcome-message h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .welcome-message p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Search Section */
+        .search-section {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .search-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-box button {
+            background: white;
+            color: var(--secondary);
+            border: none;
+            padding: 0 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .search-box button:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        /* Books & Resources */
+        .books-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .book-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--secondary);
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .book-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .book-status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .available {
+            background: #d5f4e6;
+            color: var(--success);
+        }
+
+        .unavailable {
+            background: #ffeaea;
+            color: var(--accent);
+        }
+
+        /* Projects & Journals */
+        .project-list, .journal-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .project-list li, .journal-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .project-list a, .journal-list a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 600;
+            flex: 1;
+        }
+
+        .project-list a:hover, .journal-list a:hover {
+            text-decoration: underline;
+        }
+
+        /* Batch Selector */
+        .batch-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .batch-btn {
+            padding: 10px 20px;
+            background: #f1f1f1;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .batch-btn.active, .batch-btn:hover {
+            background: var(--secondary);
+            color: white;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 8px 15px;
+            background: #f1f1f1;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .page-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #ddd;
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--secondary);
+            outline: none;
+        }
+
+        .btn {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        /* Admin Return Button */
+        .admin-return-btn {
+            background: linear-gradient(to right, #f39c12, #e67e22);
+        }
+
+        .btn-sm {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Hidden elements */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--primary);
+            margin-top: 50px;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+           
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+           
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .admin-access-container {
+                bottom: 10px;
+                right: 10px;
+            }
+            
+            .admin-code-input {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-book-open"></i>
+                <h1>ECE Department <span>Library</span></h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-page="home">Home</a></li>
+                    <li><a href="#" class="nav-link" data-page="books">Books</a></li>
+                    <li><a href="#" class="nav-link" data-page="projects">Projects</a></li>
+                    <li><a href="#" class="nav-link" data-page="journals">Journals</a></li>
+                    <li><button class="btn admin-return-btn" id="adminReturnBtn" style="display: none;">
+                        <i class="fas fa-tachometer-alt"></i> Return to Dashboard
+                    </button></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hidden Admin Access -->
+    <div class="admin-access-container">
+        <div class="admin-trigger" id="adminTrigger">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div class="admin-code-input" id="adminCodeInput">
+            <div class="code-input-group">
+                <label for="accessCode">Enter Admin Access Code:</label>
+                <input type="password" id="accessCode" class="code-input" 
+                       placeholder="Enter 6-digit code" maxlength="6">
+            </div>
+            <button class="btn btn-sm" id="submitAccessCode" 
+                    style="width: 100%; padding: 10px;">
+                <i class="fas fa-unlock"></i> Access Admin Panel
+            </button>
+            <div style="margin-top: 10px; text-align: center;">
+                <small style="color: #666; font-size: 0.8rem;">
+                    Hint: Today's date in DDMMYY format
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scrolling Message -->
+    <div class="scrolling-message">
+        <div class="message-container" id="messageContainer">
+            <p>📚 DEPARTMENT OF ELECTRONICS AND COMMUNICATION ENGINEERING DIGITAL LIBRARY</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Welcome Message -->
+        <div class="welcome-message">
+            <h2>Welcome to ECE Digital Library</h2>
+            <p>Access textbooks, research papers, projects, and journals for Electronics and Communication Engineering students.</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <h2>Search Library Resources</h2>
+            <div class="search-box">
+                <input type="text" id="mainSearch" placeholder="Search books, projects, journals...">
+                <button id="mainSearchBtn">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+
+        <div id="public-view">
+            <div class="dashboard">
+                <!-- Quick Links -->
+                <div class="card">
+                    <h2><i class="fas fa-link"></i> Quick Links</h2>
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <button class="btn" onclick="showSection('books')">
+                            <i class="fas fa-book"></i> Browse Books
+                        </button>
+                        <button class="btn" onclick="showSection('projects')">
+                            <i class="fas fa-project-diagram"></i> View Projects
+                        </button>
+                        <button class="btn" onclick="showSection('journals')">
+                            <i class="fas fa-newspaper"></i> Access Journals
+                        </button>
+                    </div>
+                </div>
+               
+                <!-- Recent Additions -->
+                <div class="card">
+                    <h2><i class="fas fa-clock"></i> Recently Added</h2>
+                    <div id="recentLoading" class="spinner"></div>
+                    <div id="recentBooks" style="display: none;">
+                        <!-- Recent books will be loaded here -->
+                    </div>
+                </div>
+               
+                <!-- Library Information -->
+                <div class="card">
+                    <h2><i class="fas fa-info-circle"></i> Library Information</h2>
+                    <p><strong>Timings:</strong> 9:00 AM - 8:00 PM (Mon-Sat)</p>
+                    <p><strong>Location:</strong> ECE Department, 2nd Floor</p>
+                    <p><strong>Contact:</strong> ecelibrary@department.edu</p>
+                    <p><strong>Librarian:</strong> Dr. R. Sharma</p>
+                    <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                        For admin access, contact the department head.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Books Section -->
+            <div id="books-section" class="hidden">
+                <div class="card">
+                    <h2><i class="fas fa-book"></i> Available Books</h2>
+                    <div id="booksLoading" class="spinner"></div>
+                    <div class="books-list" id="booksList" style="display: none;">
+                        <!-- Books will be populated from Firebase -->
+                    </div>
+                    <div class="pagination" id="booksPagination" style="display: none;">
+                        <!-- Pagination will be added by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects Section -->
+            <div id="projects-section" class="hidden">
+                <div class="card">
+                    <h2><i class="fas fa-project-diagram"></i> Department Projects</h2>
+                    <div class="batch-selector">
+                        <button class="batch-btn" data-batch="2026">Batch 2026</button>
+                        <button class="batch-btn" data-batch="2025">Batch 2025</button>
+                        <button class="batch-btn" data-batch="2024">Batch 2024</button>
+                        <button class="batch-btn" data-batch="2023">Batch 2023</button>
+                        <button class="batch-btn" data-batch="2022">Batch 2022</button>
+                        <button class="batch-btn" data-batch="2021">Batch 2021</button>
+                    </div>
+                    <div id="projectsLoading" class="spinner"></div>
+                    <ul class="project-list" id="projectList" style="display: none;">
+                        <!-- Projects will be populated from Firebase -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Journals Section -->
+            <div id="journals-section" class="hidden">
+                <div class="card">
+                    <h2><i class="fas fa-newspaper"></i> Journal Links</h2>
+                    <div id="journalsLoading" class="spinner"></div>
+                    <ul class="journal-list" id="journalList" style="display: none;">
+                        <!-- Journals will be populated from Firebase -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 Department Library Management System | Electronics And Communication Engineering Department</p>
+        <p><i class="fas fa-envelope"></i> ecelibrary@department.edu | <i class="fas fa-envelope"></i>hod.ece@shanmugha.edu</p>
+    </footer>
+
+    <script>
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAh99Zr_V2f7l_48U_5gYoNXgE9vodonsE",
+            authDomain: "ece-library-d2948.firebaseapp.com",
+            projectId: "ece-library-d2948",
+            storageBucket: "ece-library-d2948.firebasestorage.app",
+            messagingSenderId: "522135866665",
+            appId: "1:522135866665:web:8fdde8c1c6611115f97b38"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Initialize Firebase services
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // ============================================
+        // AUTHORIZED ADMIN EMAILS (Same as adminlogin.html)
+        // ============================================
+        
+        const AUTHORIZED_ADMINS = [
+            "vinoth.ece@shanmugha.edu.in",
+            "hod.ece@shanmugha.edu.in",
+            "santhoshwebworker@gmail.com"
+        ];
+
+        // ============================================
+        // ADMIN ACCESS CONFIGURATION
+        // ============================================
+        
+        const ADMIN_ACCESS_CODES = {
+            "123456": "Default Admin",
+            "281226": "Today's Date",
+            "admin": "Super Admin",
+            "ece2026": "ECE Department 2026"
+        };
+
+        function generateTodayCode() {
+            const today = new Date();
+            const day = String(today.getDate()).padStart(2, '0');
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const year = String(today.getFullYear()).slice(-2);
+            return day + month + year;
+        }
+
+        // ============================================
+        // GLOBAL VARIABLES
+        // ============================================
+
+        let currentPage = 1;
+        let booksPerPage = 12;
+        let books = [];
+        let projects = {};
+        let journals = [];
+        let currentBatch = '2026';
+
+        // ============================================
+        // DOM ELEMENTS
+        // ============================================
+
+        const navLinks = document.querySelectorAll('.nav-link');
+        const adminTrigger = document.getElementById('adminTrigger');
+        const adminCodeInput = document.getElementById('adminCodeInput');
+        const accessCodeInput = document.getElementById('accessCode');
+        const submitAccessCode = document.getElementById('submitAccessCode');
+        const mainSearch = document.getElementById('mainSearch');
+        const mainSearchBtn = document.getElementById('mainSearchBtn');
+        const adminReturnBtn = document.getElementById('adminReturnBtn');
+
+        // ============================================
+        // CHECK ADMIN LOGIN STATUS
+        // ============================================
+        
+        // Check if admin is logged in using Firebase Authentication
+        function checkAdminLogin() {
+            auth.onAuthStateChanged((user) => {
+                if (user && AUTHORIZED_ADMINS.includes(user.email)) {
+                    // Authorized admin is logged in - show return button
+                    adminReturnBtn.style.display = 'block';
+                    console.log("Admin logged in, showing return button");
+                } else {
+                    // No user logged in or not authorized - hide button
+                    adminReturnBtn.style.display = 'none';
+                    console.log("No admin logged in, hiding return button");
+                }
+            });
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        // Check admin login status on page load
+        checkAdminLogin();
+        
+        // Load data from Firebase
+        loadAllData();
+
+        // ============================================
+        // ADMIN RETURN BUTTON HANDLER - SIMPLE VERSION
+        // ============================================
+        
+        adminReturnBtn.addEventListener('click', () => {
+            // Always redirect to adminlogin.html
+            // Let Google SSO handle the authentication
+            window.location.href = 'adminlogin.html';
+        });
+
+        // ============================================
+        // ADMIN ACCESS CODE HANDLING
+        // ============================================
+
+        // Admin code access
+        adminTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adminCodeInput.classList.toggle('active');
+            
+            // Focus on input when opened
+            if (adminCodeInput.classList.contains('active')) {
+                setTimeout(() => {
+                    accessCodeInput.focus();
+                }, 100);
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!adminCodeInput.contains(e.target) && !adminTrigger.contains(e.target)) {
+                adminCodeInput.classList.remove('active');
+            }
+        });
+
+        submitAccessCode.addEventListener('click', () => {
+            const enteredCode = accessCodeInput.value.trim();
+            
+            if (!enteredCode) {
+                alert('Please enter access code');
+                return;
+            }
+
+            // Check access codes
+            const todayCode = generateTodayCode();
+            const validCodes = Object.keys(ADMIN_ACCESS_CODES);
+            
+            if (validCodes.includes(enteredCode) || enteredCode === todayCode) {
+                // Valid code - store temporary access and redirect to admin login
+                localStorage.setItem('admin_temp_access', 'true');
+                localStorage.setItem('access_code_used', enteredCode);
+                
+                // Redirect to admin login page
+                window.location.href = 'adminlogin.html';
+            } else {
+                // Invalid code
+                alert('Invalid access code! Please try again.');
+                accessCodeInput.value = '';
+                accessCodeInput.focus();
+                
+                // Shake animation
+                adminCodeInput.style.animation = 'none';
+                setTimeout(() => {
+                    adminCodeInput.style.animation = 'shake 0.5s';
+                }, 10);
+            }
+        });
+
+        accessCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                submitAccessCode.click();
+            }
+        });
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = e.target.getAttribute('data-page');
+               
+                navLinks.forEach(l => l.classList.remove('active'));
+                e.target.classList.add('active');
+               
+                document.querySelectorAll('#public-view > div').forEach(div => {
+                    div.classList.add('hidden');
+                });
+               
+                if (page === 'home') {
+                    document.querySelector('.dashboard').classList.remove('hidden');
+                } else {
+                    document.getElementById(`${page}-section`).classList.remove('hidden');
+                    loadSection(page);
+                }
+            });
+        });
+
+        function showSection(section) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            document.querySelector(`[data-page="${section}"]`).classList.add('active');
+            
+            document.querySelectorAll('#public-view > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+            
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            loadSection(section);
+        }
+
+        function loadSection(section) {
+            switch(section) {
+                case 'books':
+                    loadBooks();
+                    break;
+                case 'projects':
+                    loadProjects();
+                    break;
+                case 'journals':
+                    loadJournals();
+                    break;
+            }
+        }
+
+        // ============================================
+        // SEARCH FUNCTIONALITY
+        // ============================================
+
+        mainSearchBtn.addEventListener('click', performMainSearch);
+        mainSearch.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performMainSearch();
+        });
+
+        function performMainSearch() {
+            const query = mainSearch.value.toLowerCase().trim();
+            if (!query) {
+                alert('Please enter search terms');
+                return;
+            }
+            
+            const bookResults = books.filter(book => 
+                book.title.toLowerCase().includes(query) ||
+                book.author.toLowerCase().includes(query) ||
+                (book.isbn && book.isbn.toLowerCase().includes(query))
+            );
+            
+            let projectResults = [];
+            Object.keys(projects).forEach(batch => {
+                projects[batch].forEach(project => {
+                    if (project.title.toLowerCase().includes(query)) {
+                        projectResults.push({...project, batch});
+                    }
+                });
+            });
+            
+            const journalResults = journals.filter(journal => 
+                journal.name.toLowerCase().includes(query)
+            );
+            
+            showSearchResults(query, bookResults, projectResults, journalResults);
+        }
+
+        function showSearchResults(query, books, projects, journals) {
+            navLinks.forEach(l => l.classList.remove('active'));
+            document.querySelector('[data-page="home"]').classList.add('active');
+            
+            document.querySelectorAll('#public-view > div').forEach(div => {
+                div.classList.add('hidden');
+            });
+            document.querySelector('.dashboard').classList.remove('hidden');
+            
+            const dashboard = document.querySelector('.dashboard');
+            
+            const booksCard = document.createElement('div');
+            booksCard.className = 'card';
+            booksCard.innerHTML = `
+                <h2><i class="fas fa-book"></i> Books Found (${books.length})</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${books.length > 0 ? 
+                        books.slice(0, 5).map(book => `
+                            <div class="book-item" style="margin-bottom: 10px;">
+                                <h3>${book.title}</h3>
+                                <p><strong>Author:</strong> ${book.author}</p>
+                                <span class="book-status ${book.status}">
+                                    ${book.status === 'available' ? '✓ Available' : '✗ Checked Out'}
+                                </span>
+                            </div>
+                        `).join('') :
+                        '<p style="text-align: center; color: #666;">No books found</p>'
+                    }
+                </div>
+                ${books.length > 5 ? 
+                    `<button class="btn" onclick="showSection('books')" style="margin-top: 15px; width: 100%;">
+                        View All ${books.length} Books
+                    </button>` : ''
+                }
+            `;
+            
+            const projectsCard = document.createElement('div');
+            projectsCard.className = 'card';
+            projectsCard.innerHTML = `
+                <h2><i class="fas fa-project-diagram"></i> Projects Found (${projects.length})</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${projects.length > 0 ? 
+                        projects.slice(0, 5).map(project => `
+                            <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                                <strong>${project.title}</strong>
+                                <div style="font-size: 0.85rem; color: #666;">
+                                    Batch: ${project.batch}
+                                </div>
+                            </div>
+                        `).join('') :
+                        '<p style="text-align: center; color: #666;">No projects found</p>'
+                    }
+                </div>
+                ${projects.length > 5 ? 
+                    `<button class="btn" onclick="showSection('projects')" style="margin-top: 15px; width: 100%;">
+                        View All ${projects.length} Projects
+                    </button>` : ''
+                }
+            `;
+            
+            const journalsCard = document.createElement('div');
+            journalsCard.className = 'card';
+            journalsCard.innerHTML = `
+                <h2><i class="fas fa-newspaper"></i> Journals Found (${journals.length})</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${journals.length > 0 ? 
+                        journals.slice(0, 5).map(journal => `
+                            <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                                <a href="${journal.url}" target="_blank" style="color: var(--secondary); text-decoration: none;">
+                                    ${journal.name}
+                                </a>
+                            </div>
+                        `).join('') :
+                        '<p style="text-align: center; color: #666;">No journals found</p>'
+                    }
+                </div>
+                ${journals.length > 5 ? 
+                    `<button class="btn" onclick="showSection('journals')" style="margin-top: 15px; width: 100%;">
+                        View All ${journals.length} Journals
+                    </button>` : ''
+                }
+            `;
+            
+            dashboard.innerHTML = '';
+            dashboard.appendChild(booksCard);
+            dashboard.appendChild(projectsCard);
+            dashboard.appendChild(journalsCard);
+            
+            const summaryCard = document.createElement('div');
+            summaryCard.className = 'card';
+            summaryCard.innerHTML = `
+                <h2><i class="fas fa-search"></i> Search Results for "${query}"</h2>
+                <p>Found ${books.length + projects.length + journals.length} total results:</p>
+                <p>• ${books.length} books</p>
+                <p>• ${projects.length} projects</p>
+                <p>• ${journals.length} journals</p>
+                <button class="btn" onclick="location.reload()" style="margin-top: 15px;">
+                    <i class="fas fa-home"></i> Back to Home
+                </button>
+            `;
+            dashboard.insertBefore(summaryCard, dashboard.firstChild);
+        }
+
+        // ============================================
+        // FIREBASE DATA FUNCTIONS
+        // ============================================
+
+        async function loadAllData() {
+            try {
+                await Promise.all([
+                    loadBooksFromFirebase(),
+                    loadProjectsFromFirebase(),
+                    loadJournalsFromFirebase(),
+                    loadScrollingMessage(),
+                    loadRecentBooks()
+                ]);
+                console.log("All data loaded successfully");
+            } catch (error) {
+                console.error("Error loading data:", error);
+                alert("Unable to load library data. Please try again later.");
+            }
+        }
+
+        async function loadBooksFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("books")
+                    .orderBy("addedDate", "desc")
+                    .limit(50)
+                    .get();
+                
+                books = [];
+                querySnapshot.forEach(doc => {
+                    books.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`Loaded ${books.length} books`);
+            } catch (error) {
+                console.error("Error loading books:", error);
+                throw error;
+            }
+        }
+
+        async function loadRecentBooks() {
+            try {
+                const querySnapshot = await db.collection("books")
+                    .orderBy("addedDate", "desc")
+                    .limit(5)
+                    .get();
+                
+                const recentBooks = [];
+                querySnapshot.forEach(doc => {
+                    recentBooks.push(doc.data());
+                });
+                
+                displayRecentBooks(recentBooks);
+            } catch (error) {
+                console.error("Error loading recent books:", error);
+            }
+        }
+
+        function displayRecentBooks(recentBooks) {
+            const recentBooksDiv = document.getElementById('recentBooks');
+            const loadingDiv = document.getElementById('recentLoading');
+            
+            if (recentBooks.length === 0) {
+                recentBooksDiv.innerHTML = '<p style="text-align: center; color: #666;">No recent additions</p>';
+            } else {
+                recentBooksDiv.innerHTML = recentBooks.map(book => `
+                    <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                        <strong>${book.title}</strong>
+                        <div style="font-size: 0.9rem; color: #666;">${book.author}</div>
+                        <span class="book-status ${book.status}" style="font-size: 0.8rem;">
+                            ${book.status === 'available' ? 'Available' : 'Checked Out'}
+                        </span>
+                    </div>
+                `).join('');
+            }
+            
+            loadingDiv.style.display = 'none';
+            recentBooksDiv.style.display = 'block';
+        }
+
+        async function loadProjectsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("projects").get();
+                projects = {};
+                querySnapshot.forEach(doc => {
+                    const project = doc.data();
+                    const batch = project.batch || "2026";
+                    if (!projects[batch]) projects[batch] = [];
+                    projects[batch].push({ id: doc.id, ...project });
+                });
+                
+                console.log(`Loaded projects from Firebase`);
+            } catch (error) {
+                console.error("Error loading projects:", error);
+                throw error;
+            }
+        }
+
+        async function loadJournalsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("journals")
+                    .orderBy("name")
+                    .get();
+                
+                journals = [];
+                querySnapshot.forEach(doc => {
+                    journals.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`Loaded ${journals.length} journals`);
+            } catch (error) {
+                console.error("Error loading journals:", error);
+                throw error;
+            }
+        }
+
+        async function loadScrollingMessage() {
+            try {
+                const doc = await db.collection("settings").doc("scrolling_message").get();
+                if (doc.exists && doc.data().message) {
+                    document.getElementById('messageContainer').innerHTML = `
+                        <p>${doc.data().message}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error("Error loading scrolling message:", error);
+            }
+        }
+
+        // ============================================
+        // DISPLAY FUNCTIONS
+        // ============================================
+
+        function loadBooks(page = 1) {
+            currentPage = page;
+            const booksList = document.getElementById('booksList');
+            const loadingDiv = document.getElementById('booksLoading');
+            
+            booksList.innerHTML = '';
+           
+            if (books.length === 0) {
+                booksList.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1 / -1;">No books available</p>';
+                document.getElementById('booksPagination').innerHTML = '';
+                loadingDiv.style.display = 'none';
+                booksList.style.display = 'grid';
+                return;
+            }
+           
+            const totalPages = Math.ceil(books.length / booksPerPage);
+            const startIndex = (page - 1) * booksPerPage;
+            const endIndex = Math.min(startIndex + booksPerPage, books.length);
+            const pageBooks = books.slice(startIndex, endIndex);
+           
+            pageBooks.forEach(book => {
+                const bookItem = document.createElement('div');
+                bookItem.className = 'book-item';
+                bookItem.innerHTML = `
+                    <h3>${book.title}</h3>
+                    <p><strong>Author:</strong> ${book.author}</p>
+                    ${book.isbn ? `<p><strong>ISBN:</strong> ${book.isbn}</p>` : ''}
+                    ${book.year ? `<p><strong>Year:</strong> ${book.year}</p>` : ''}
+                    <span class="book-status ${book.status}">${book.status === 'available' ? '✓ Available' : '✗ Checked Out'}</span>
+                `;
+                booksList.appendChild(bookItem);
+            });
+            
+            const infoMsg = document.createElement('p');
+            infoMsg.style.textAlign = 'center';
+            infoMsg.style.gridColumn = '1 / -1';
+            infoMsg.style.color = '#666';
+            infoMsg.innerHTML = `Showing ${startIndex + 1}-${endIndex} of ${books.length} books`;
+            booksList.appendChild(infoMsg);
+            
+            const pagination = document.getElementById('booksPagination');
+            pagination.innerHTML = '';
+            pagination.style.display = totalPages > 1 ? 'flex' : 'none';
+            
+            if (page > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'page-btn';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevBtn.onclick = () => loadBooks(page - 1);
+                pagination.appendChild(prevBtn);
+            }
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = `page-btn ${i === page ? 'active' : ''}`;
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => loadBooks(i);
+                    pagination.appendChild(pageBtn);
+                } else if (i === page - 3 || i === page + 3) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '8px 15px';
+                    pagination.appendChild(ellipsis);
+                }
+            }
+            
+            if (page < totalPages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'page-btn';
+                nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextBtn.onclick = () => loadBooks(page + 1);
+                pagination.appendChild(nextBtn);
+            }
+            
+            loadingDiv.style.display = 'none';
+            booksList.style.display = 'grid';
+        }
+
+        function loadProjects() {
+            const projectList = document.getElementById('projectList');
+            const loadingDiv = document.getElementById('projectsLoading');
+            projectList.innerHTML = '';
+           
+            if (projects[currentBatch] && projects[currentBatch].length > 0) {
+                projects[currentBatch].forEach(project => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="#" onclick="viewProject('${project.id}')">${project.title}</a>
+                        <span style="color: #666; font-size: 0.9rem;">PDF</span>
+                    `;
+                    projectList.appendChild(li);
+                });
+            } else {
+                projectList.innerHTML = '<li style="text-align: center; color: #666;">No projects available for this batch</li>';
+            }
+            
+            loadingDiv.style.display = 'none';
+            projectList.style.display = 'block';
+        }
+
+        async function viewProject(projectId) {
+            try {
+                const projectDoc = await db.collection("projects").doc(projectId).get();
+                if (projectDoc.exists) {
+                    const project = projectDoc.data();
+                    if (project.fileUrl) {
+                        window.open(project.fileUrl, '_blank');
+                    } else {
+                        alert("No file available for this project");
+                    }
+                }
+            } catch (error) {
+                console.error("Error viewing project:", error);
+                alert("Could not open project file.");
+            }
+        }
+
+        function loadJournals() {
+            const journalList = document.getElementById('journalList');
+            const loadingDiv = document.getElementById('journalsLoading');
+            journalList.innerHTML = '';
+           
+            journals.forEach(journal => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <a href="${journal.url}" target="_blank">${journal.name}</a>
+                    <i class="fas fa-external-link-alt" style="color: #666;"></i>
+                `;
+                journalList.appendChild(li);
+            });
+            
+            loadingDiv.style.display = 'none';
+            journalList.style.display = 'block';
+        }
+
+        // ============================================
+        // BATCH SELECTOR
+        // ============================================
+
+        document.querySelectorAll('.batch-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.batch-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentBatch = e.target.getAttribute('data-batch');
+                loadProjects();
+            });
+        });
+
+        // Set first batch as active initially
+        document.querySelector('.batch-btn[data-batch="2026"]').classList.add('active');
+
+        // ============================================
+        // KEYBOARD SHORTCUTS
+        // ============================================
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                e.preventDefault();
+                adminTrigger.click();
+                accessCodeInput.focus();
+            }
+            
+            if (e.key === 'Escape') {
+                adminCodeInput.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // INITIAL LOAD
+        // ============================================
+
+        loadBooks();
+    </script>
+</body>
+</html>
