@@ -294,6 +294,84 @@
             border-radius: 5px;
         }
 
+        /* Add Batch Button */
+        .add-batch-btn {
+            background: linear-gradient(to right, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s;
+        }
+
+        .add-batch-btn:hover {
+            background: linear-gradient(to right, #229954, #27ae60);
+            transform: translateY(-2px);
+        }
+
+        /* Batch Management Styles */
+        .batch-management {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .batch-input-group {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+        }
+
+        .custom-batch-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        /* Custom Batch List */
+        .custom-batch-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .batch-tag {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .batch-tag:hover {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+        }
+
+        .batch-tag i {
+            font-size: 0.8rem;
+        }
+
         /* Books List */
         .books-list {
             display: grid;
@@ -628,6 +706,14 @@
             .batch-grid {
                 grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
             }
+            
+            .batch-management {
+                flex-direction: column;
+            }
+            
+            .batch-input-group {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -910,6 +996,8 @@
                     <label>Project Title</label>
                     <input type="text" id="projectTitle" class="form-control" placeholder="Enter project title">
                 </div>
+                
+                <!-- Batch Management -->
                 <div class="form-group">
                     <label>Select Batch</label>
                     <select id="projectBatch" class="form-control">
@@ -920,8 +1008,27 @@
                         <option value="2022">2022 Batch</option>
                         <option value="2021">2021 Batch</option>
                         <option value="2020">2020 Batch</option>
+                        <option value="2019">2019 Batch</option>
+                        <option value="2018">2018 Batch</option>
+                        <option value="custom">Add Custom Batch</option>
                     </select>
                 </div>
+                
+                <!-- Custom Batch Input -->
+                <div class="batch-management" id="customBatchSection" style="display: none;">
+                    <div class="batch-input-group">
+                        <input type="text" id="customBatchInput" class="custom-batch-input" placeholder="Enter batch year (e.g., 2050, 2100)">
+                        <button class="btn btn-success" id="addCustomBatchBtn">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Custom Batch List -->
+                <div class="custom-batch-list" id="customBatchList">
+                    <!-- Custom batches will appear here -->
+                </div>
+                
                 <div class="file-upload" id="pdfUpload">
                     <i class="fas fa-file-pdf"></i>
                     <p>Upload Project PDF file</p>
@@ -1081,6 +1188,118 @@
         let adminCurrentPage = 1;
         let adminBooksPerPage = 20;
         let adminSearchQuery = '';
+        let customBatches = [];
+
+        // ============================================
+        // CUSTOM BATCH MANAGEMENT
+        // ============================================
+
+        // Load custom batches from localStorage
+        function loadCustomBatches() {
+            const savedBatches = localStorage.getItem('customBatches');
+            if (savedBatches) {
+                customBatches = JSON.parse(savedBatches);
+            }
+            renderCustomBatches();
+        }
+
+        // Save custom batches to localStorage
+        function saveCustomBatches() {
+            localStorage.setItem('customBatches', JSON.stringify(customBatches));
+        }
+
+        // Render custom batches in the UI
+        function renderCustomBatches() {
+            const customBatchList = document.getElementById('customBatchList');
+            const projectBatchSelect = document.getElementById('projectBatch');
+            
+            // Clear existing custom batches from select
+            Array.from(projectBatchSelect.options).forEach(option => {
+                if (option.value === 'custom') {
+                    // Keep only the "Add Custom Batch" option
+                }
+            });
+            
+            // Add custom batches to select dropdown
+            customBatches.forEach(batch => {
+                const optionExists = Array.from(projectBatchSelect.options).some(
+                    opt => opt.value === batch
+                );
+                if (!optionExists && batch !== 'custom') {
+                    const option = document.createElement('option');
+                    option.value = batch;
+                    option.textContent = `${batch} Batch`;
+                    // Insert before the "custom" option
+                    const customOption = projectBatchSelect.querySelector('option[value="custom"]');
+                    projectBatchSelect.insertBefore(option, customOption);
+                }
+            });
+            
+            // Render batch tags
+            customBatchList.innerHTML = '';
+            customBatches.forEach(batch => {
+                if (batch !== 'custom') {
+                    const batchTag = document.createElement('div');
+                    batchTag.className = 'batch-tag';
+                    batchTag.innerHTML = `
+                        ${batch}
+                        <i class="fas fa-times" onclick="removeCustomBatch('${batch}')"></i>
+                    `;
+                    customBatchList.appendChild(batchTag);
+                }
+            });
+        }
+
+        // Add custom batch
+        function addCustomBatch() {
+            const customBatchInput = document.getElementById('customBatchInput');
+            const batchValue = customBatchInput.value.trim();
+            
+            if (!batchValue) {
+                showNotification('Please enter a batch year!', 'warning');
+                return;
+            }
+            
+            // Validate batch format (should be a year)
+            if (!/^\d{4}$/.test(batchValue)) {
+                showNotification('Please enter a valid 4-digit year (e.g., 2050)!', 'warning');
+                return;
+            }
+            
+            const year = parseInt(batchValue);
+            if (year < 1900 || year > 2200) {
+                showNotification('Please enter a year between 1900 and 2200!', 'warning');
+                return;
+            }
+            
+            // Check if batch already exists
+            if (customBatches.includes(batchValue)) {
+                showNotification(`Batch ${batchValue} already exists!`, 'warning');
+                return;
+            }
+            
+            // Add to custom batches
+            customBatches.push(batchValue);
+            saveCustomBatches();
+            renderCustomBatches();
+            
+            // Select the newly added batch
+            document.getElementById('projectBatch').value = batchValue;
+            customBatchInput.value = '';
+            document.getElementById('customBatchSection').style.display = 'none';
+            
+            showNotification(`Batch ${batchValue} added successfully!`, 'success');
+        }
+
+        // Remove custom batch
+        function removeCustomBatch(batch) {
+            if (confirm(`Remove batch ${batch}? This won't delete existing projects in this batch.`)) {
+                customBatches = customBatches.filter(b => b !== batch);
+                saveCustomBatches();
+                renderCustomBatches();
+                showNotification(`Batch ${batch} removed!`, 'success');
+            }
+        }
 
         // ============================================
         // DASHBOARD DATA LOADING
@@ -1158,6 +1377,24 @@
                     if (!projects[batch]) projects[batch] = [];
                     projects[batch].push({ id: doc.id, ...project });
                 });
+                
+                // Add custom batches from projects to our list
+                querySnapshot.forEach(doc => {
+                    const project = doc.data();
+                    if (project.batch && !customBatches.includes(project.batch)) {
+                        // Check if it's a custom batch (not in default list)
+                        const defaultBatches = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
+                        if (!defaultBatches.includes(project.batch) && /^\d{4}$/.test(project.batch)) {
+                            customBatches.push(project.batch);
+                        }
+                    }
+                });
+                
+                // Remove duplicates and save
+                customBatches = [...new Set(customBatches)];
+                saveCustomBatches();
+                renderCustomBatches();
+                
             } catch (error) {
                 console.error("Error loading projects:", error);
                 throw error;
@@ -1534,8 +1771,7 @@
             const modal = document.getElementById('deleteProjectsModal');
             const batchGrid = document.getElementById('batchSelectionGrid');
             
-            // Populate batch grid
-            batchGrid.innerHTML = '';
+            // Get all batches including custom ones
             const allBatches = Object.keys(projects).sort((a, b) => b - a);
             
             if (allBatches.length === 0) {
@@ -1543,6 +1779,7 @@
                 return;
             }
             
+            batchGrid.innerHTML = '';
             allBatches.forEach(batch => {
                 const projectCount = projects[batch] ? projects[batch].length : 0;
                 if (projectCount > 0) {
@@ -1636,6 +1873,11 @@
                         });
                         await projectsBatch.commit();
                     }
+                    
+                    // Clear custom batches
+                    customBatches = [];
+                    saveCustomBatches();
+                    renderCustomBatches();
                     
                     // Clear scrolling message
                     await db.collection("settings").doc("scrolling_message").set({
@@ -2233,15 +2475,25 @@
             });
         });
 
-        // PDF upload handler
+        // ============================================
+        // PDF UPLOAD HANDLER WITH CUSTOM BATCH SUPPORT
+        // ============================================
+
         document.getElementById('pdfFile').addEventListener('change', async (e) => {
             if (e.target.files.length > 0) {
                 const title = document.getElementById('projectTitle').value;
-                const batch = document.getElementById('projectBatch').value;
+                const batchSelect = document.getElementById('projectBatch');
+                const batch = batchSelect.value;
                 const file = e.target.files[0];
                 
                 if (!title) {
                     showNotification('Please enter project title first', 'warning');
+                    e.target.value = '';
+                    return;
+                }
+                
+                if (batch === 'custom') {
+                    showNotification('Please select a valid batch or add one!', 'warning');
                     e.target.value = '';
                     return;
                 }
@@ -2255,7 +2507,7 @@
                 try {
                     // Upload PDF file
                     const storageRef = storage.ref();
-                    const fileRef = storageRef.child(`projects/${Date.now()}_${file.name}`);
+                    const fileRef = storageRef.child(`projects/${batch}/${Date.now()}_${file.name}`);
                     await fileRef.put(file);
                     const fileUrl = await fileRef.getDownloadURL();
                     
@@ -2268,7 +2520,8 @@
                         addedDate: firebase.firestore.FieldValue.serverTimestamp(),
                         addedBy: auth.currentUser.email,
                         fileSize: file.size,
-                        fileType: file.type
+                        fileType: file.type,
+                        isCustomBatch: customBatches.includes(batch)
                     };
                     
                     await db.collection("projects").add(projectData);
@@ -2276,14 +2529,48 @@
                     loadAdminProjectsList();
                     updateDeleteCounts();
                     
+                    // Clear form
                     document.getElementById('projectTitle').value = '';
+                    batchSelect.value = '2026'; // Reset to default
+                    document.getElementById('customBatchSection').style.display = 'none';
                     e.target.value = '';
+                    
                     showNotification('Project uploaded successfully!', 'success');
                 } catch (error) {
                     console.error('Error uploading project:', error);
                     showNotification('Failed to upload project', 'error');
                 }
             }
+        });
+
+        // ============================================
+        // CUSTOM BATCH EVENT LISTENERS
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load custom batches
+            loadCustomBatches();
+            
+            // Show/hide custom batch input
+            document.getElementById('projectBatch').addEventListener('change', function() {
+                const customBatchSection = document.getElementById('customBatchSection');
+                if (this.value === 'custom') {
+                    customBatchSection.style.display = 'flex';
+                    document.getElementById('customBatchInput').focus();
+                } else {
+                    customBatchSection.style.display = 'none';
+                }
+            });
+            
+            // Add custom batch button
+            document.getElementById('addCustomBatchBtn').addEventListener('click', addCustomBatch);
+            
+            // Enter key to add custom batch
+            document.getElementById('customBatchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomBatch();
+                }
+            });
         });
 
         // ============================================
