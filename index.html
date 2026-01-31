@@ -432,6 +432,48 @@
             background: #ddd;
         }
 
+        /* Book Count Display */
+        .book-count-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .total-books {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .load-more-btn {
+            background: linear-gradient(to right, var(--secondary), var(--primary));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .load-more-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        .loading-text {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-style: italic;
+        }
+
         /* Form Elements */
         .form-group {
             margin-bottom: 25px;
@@ -652,8 +694,10 @@
                 <!-- Library Information -->
                 <div class="card">
                     <h2><i class="fas fa-info-circle"></i> Library Information</h2>
-                    <p><strong>Timings:</strong> 9:00 AM - 5:00 PM (Mon-Sat)</p>
-                    <p><strong>Contact:</strong> hod.ece@shanmugha.edu.in </p>
+                    <p><strong>Timings:</strong> 9:00 AM - 8:00 PM (Mon-Sat)</p>
+                    <p><strong>Location:</strong> ECE Department, 2nd Floor</p>
+                    <p><strong>Contact:</strong> ecelibrary@department.edu</p>
+                    <p><strong>Librarian:</strong> Dr. R. Sharma</p>
                     <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
                         For admin access, contact the department head.
                     </p>
@@ -664,13 +708,21 @@
             <div id="books-section" class="hidden">
                 <div class="card">
                     <h2><i class="fas fa-book"></i> Available Books</h2>
+                    <div class="book-count-info">
+                        <span class="total-books" id="totalBooksDisplay">Loading books...</span>
+                        <span id="booksDisplayedInfo"></span>
+                    </div>
                     <div id="booksLoading" class="spinner"></div>
+                    <div id="booksLoadingText" class="loading-text" style="display: none;">Loading more books...</div>
                     <div class="books-list" id="booksList" style="display: none;">
                         <!-- Books will be populated from Firebase -->
                     </div>
                     <div class="pagination" id="booksPagination" style="display: none;">
                         <!-- Pagination will be added by JavaScript -->
                     </div>
+                    <button id="loadMoreBooks" class="load-more-btn">
+                        <i class="fas fa-sync-alt"></i> Load More Books
+                    </button>
                 </div>
             </div>
 
@@ -767,11 +819,15 @@
         // ============================================
 
         let currentPage = 1;
-        let booksPerPage = 12;
+        let booksPerPage = 24; // Increased from 12 to 24
         let books = [];
         let projects = {};
         let journals = [];
         let currentBatch = '2026';
+        let hasMoreBooks = true;
+        let lastBookDoc = null;
+        let totalBooksCount = 0;
+        let loadedBooksCount = 0;
 
         // ============================================
         // DOM ELEMENTS
@@ -785,6 +841,8 @@
         const mainSearch = document.getElementById('mainSearch');
         const mainSearchBtn = document.getElementById('mainSearchBtn');
         const adminReturnBtn = document.getElementById('adminReturnBtn');
+        const loadMoreBtn = document.getElementById('loadMoreBooks');
+        const booksLoadingText = document.getElementById('booksLoadingText');
 
         // ============================================
         // CHECK ADMIN LOGIN STATUS
@@ -1080,13 +1138,13 @@
         }
 
         // ============================================
-        // FIREBASE DATA FUNCTIONS
+        // FIREBASE DATA FUNCTIONS - ENHANCED
         // ============================================
 
         async function loadAllData() {
             try {
                 await Promise.all([
-                    loadBooksFromFirebase(),
+                    loadInitialBooksFromFirebase(),
                     loadProjectsFromFirebase(),
                     loadJournalsFromFirebase(),
                     loadScrollingMessage(),
@@ -1099,21 +1157,57 @@
             }
         }
 
-        async function loadBooksFromFirebase() {
+        // Load books in batches
+        async function loadInitialBooksFromFirebase() {
             try {
+                console.log("Loading initial books...");
+                
+                // First load to get first batch
+                await loadMoreBooksFromFirebase();
+                
+                // Update UI
+                document.getElementById('totalBooksDisplay').textContent = 
+                    `Total Books: ${loadedBooksCount}${hasMoreBooks ? '+' : ''}`;
+                document.getElementById('booksDisplayedInfo').textContent = 
+                    `Displaying: ${Math.min(loadedBooksCount, booksPerPage)}`;
+                
+                console.log(`Loaded ${books.length} books initially`);
+                
+            } catch (error) {
+                console.error("Error loading initial books:", error);
+                throw error;
+            }
+        }
+
+        // Load more books with pagination
+        async function loadMoreBooksFromFirebase() {
+            try {
+                booksLoadingText.style.display = 'block';
+                
                 const querySnapshot = await db.collection("books")
                     .orderBy("addedDate", "desc")
-                    .limit(50)
+                    .limit(200) // Increased limit
                     .get();
                 
-                books = [];
+                if (querySnapshot.empty) {
+                    hasMoreBooks = false;
+                    return;
+                }
+                
                 querySnapshot.forEach(doc => {
                     books.push({ id: doc.id, ...doc.data() });
                 });
                 
-                console.log(`Loaded ${books.length} books`);
+                loadedBooksCount = books.length;
+                lastBookDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+                hasMoreBooks = querySnapshot.size === 200;
+                
+                console.log(`Loaded ${books.length} total books`);
+                
+                booksLoadingText.style.display = 'none';
+                
             } catch (error) {
-                console.error("Error loading books:", error);
+                console.error("Error loading more books:", error);
                 throw error;
             }
         }
@@ -1208,7 +1302,7 @@
         }
 
         // ============================================
-        // DISPLAY FUNCTIONS
+        // DISPLAY FUNCTIONS - ENHANCED
         // ============================================
 
         function loadBooks(page = 1) {
@@ -1223,6 +1317,7 @@
                 document.getElementById('booksPagination').innerHTML = '';
                 loadingDiv.style.display = 'none';
                 booksList.style.display = 'grid';
+                loadMoreBtn.style.display = 'none';
                 return;
             }
            
@@ -1251,6 +1346,20 @@
             infoMsg.innerHTML = `Showing ${startIndex + 1}-${endIndex} of ${books.length} books`;
             booksList.appendChild(infoMsg);
             
+            // Update book count info
+            document.getElementById('totalBooksDisplay').textContent = 
+                `Total Books: ${loadedBooksCount}${hasMoreBooks ? '+' : ''}`;
+            document.getElementById('booksDisplayedInfo').textContent = 
+                `Displaying: ${Math.min(loadedBooksCount, booksPerPage)}`;
+            
+            // Show/hide load more button
+            if (hasMoreBooks && page === totalPages) {
+                loadMoreBtn.style.display = 'block';
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+            
+            // Pagination
             const pagination = document.getElementById('booksPagination');
             pagination.innerHTML = '';
             pagination.style.display = totalPages > 1 ? 'flex' : 'none';
@@ -1289,6 +1398,26 @@
             loadingDiv.style.display = 'none';
             booksList.style.display = 'grid';
         }
+
+        // Load more books button handler
+        loadMoreBtn.addEventListener('click', async () => {
+            try {
+                loadMoreBtn.disabled = true;
+                loadMoreBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                
+                await loadMoreBooksFromFirebase();
+                loadBooks(1); // Reload first page with new data
+                
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Load More Books';
+                
+            } catch (error) {
+                console.error("Error loading more books:", error);
+                loadMoreBtn.disabled = false;
+                loadMoreBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Load More Books';
+                alert("Error loading more books. Please try again.");
+            }
+        });
 
         function loadProjects() {
             const projectList = document.getElementById('projectList');
@@ -1386,5 +1515,4 @@
         loadBooks();
     </script>
 </body>
-
 </html>
