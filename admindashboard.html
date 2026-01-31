@@ -549,6 +549,41 @@
             font-weight: bold;
         }
 
+        /* Enhanced Progress Bar for Large Uploads */
+        .progress-container-large {
+            width: 100%;
+            height: 30px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            margin: 15px 0;
+            overflow: hidden;
+            display: none;
+            position: relative;
+        }
+
+        .progress-bar-large {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: bold;
+            position: relative;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+
         /* Search Bar */
         .search-container {
             display: flex;
@@ -772,6 +807,53 @@
             color: var(--accent);
         }
 
+        /* Database Stats */
+        .db-stats {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 10px 0;
+            border-left: 4px solid var(--info);
+        }
+
+        .db-stats h3 {
+            color: var(--primary);
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #eaeaea;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 3px;
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -858,6 +940,72 @@
         .mobile-menu-item i {
             width: 20px;
             font-size: 1rem;
+        }
+
+        /* Journal Categories */
+        .journal-category-select {
+            margin-bottom: 15px;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .category-tab {
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .category-tab.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .category-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .journal-category-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .badge-acm {
+            background: #0088cc;
+            color: white;
+        }
+
+        .badge-ieee {
+            background: #006699;
+            color: white;
+        }
+
+        .badge-springer {
+            background: #009688;
+            color: white;
+        }
+
+        .badge-elsevier {
+            background: #ff6f00;
+            color: white;
+        }
+
+        .badge-other {
+            background: #6c757d;
+            color: white;
         }
 
         /* Responsive Improvements for Larger Screens */
@@ -1176,6 +1324,32 @@
             <button class="btn btn-warning" id="exportBooksBtn">
                 <i class="fas fa-download"></i> Export to Excel
             </button>
+            <button class="btn btn-info" id="refreshBooksBtn">
+                <i class="fas fa-redo"></i> Refresh Books
+            </button>
+        </div>
+
+        <!-- Database Stats -->
+        <div class="db-stats" id="dbStats">
+            <h3><i class="fas fa-chart-bar"></i> Database Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="statsBooksCount">0</div>
+                    <div class="stat-label">Total Books</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statsJournalsCount">0</div>
+                    <div class="stat-label">Journal Links</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statsProjectsCount">0</div>
+                    <div class="stat-label">Projects</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="statsLastUpdated">--:--</div>
+                    <div class="stat-label">Last Updated</div>
+                </div>
+            </div>
         </div>
 
         <!-- Data Management Section -->
@@ -1244,20 +1418,27 @@
         </div>
 
         <div class="dashboard">
-            <!-- Excel Upload -->
+            <!-- Excel Upload - ENHANCED -->
             <div class="card">
-                <h2><i class="fas fa-file-excel"></i> Excel File Upload</h2>
-                <p style="margin-bottom: 10px; font-size: 0.9rem;">Upload Excel file with book data (.xlsx, .csv, .xls)</p>
+                <h2><i class="fas fa-file-excel"></i> Excel File Upload (Bulk Import)</h2>
+                <p style="margin-bottom: 10px; font-size: 0.9rem;">Upload Excel file with book data (.xlsx, .csv, .xls) - Supports 2000+ books</p>
                 
-                <!-- Progress Bar -->
-                <div class="progress-container" id="uploadProgress">
-                    <div class="progress-bar" id="uploadProgressBar">0%</div>
+                <!-- Enhanced Progress Bar -->
+                <div class="progress-container-large" id="uploadProgress">
+                    <div class="progress-bar-large" id="uploadProgressBar">0%</div>
+                </div>
+                <div class="progress-stats" id="uploadStats" style="display: none;">
+                    <span>Processed: <span id="processedCount">0</span></span>
+                    <span>Success: <span id="successCount">0</span></span>
+                    <span>Failed: <span id="failedCount">0</span></span>
+                    <span>Remaining: <span id="remainingCount">0</span></span>
                 </div>
                 
                 <!-- File Upload Area -->
                 <div class="file-upload" id="excelUpload">
                     <i class="fas fa-file-excel"></i>
                     <p>Drag & drop Excel file here or click to browse</p>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Supports .xlsx, .xls, .csv files</p>
                     <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" hidden>
                 </div>
                 
@@ -1268,6 +1449,17 @@
                         <option value="append">Append to existing books</option>
                         <option value="replace">Replace all books</option>
                     </select>
+                </div>
+
+                <!-- Batch Processing Options -->
+                <div class="form-group">
+                    <label>Batch Size:</label>
+                    <select id="batchSize" class="form-control">
+                        <option value="100">100 books per batch (Fast)</option>
+                        <option value="200" selected>200 books per batch (Recommended)</option>
+                        <option value="500">500 books per batch (For large files)</option>
+                    </select>
+                    <small style="color: #666; font-size: 0.8rem;">Larger batch = faster, but may timeout on slow connections</small>
                 </div>
                 
                 <!-- Excel Template Info -->
@@ -1323,13 +1515,16 @@
             <!-- Book List for Admin -->
             <div class="card">
                 <h2><i class="fas fa-list"></i> All Books (Editable)</h2>
+                <div style="margin-bottom: 10px; font-size: 0.9rem; color: #666;">
+                    Showing: <span id="currentBookCount">0</span> books | Total: <span id="totalBookCount">0</span> books
+                </div>
                 <div class="search-container">
                     <input type="text" id="adminBookSearch" class="form-control" placeholder="Search books by title, author, or ISBN...">
                     <button class="btn" id="adminBookSearchBtn">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
-                <div style="max-height: 300px; overflow-y: auto; margin-top: 15px;">
+                <div style="max-height: 400px; overflow-y: auto; margin-top: 15px;">
                     <div id="adminBooksList">
                         <!-- Admin book list will be populated here -->
                     </div>
@@ -1397,24 +1592,90 @@
                 </div>
             </div>
 
-            <!-- Journal Links Management -->
+            <!-- Journal Links Management - 1 -->
             <div class="card">
-                <h2><i class="fas fa-link"></i> Journal Links Management</h2>
+                <h2><i class="fas fa-link"></i> Journal Links Management - Research Journals</h2>
+                
+                <!-- Category Tabs -->
+                <div class="category-tabs" id="journalCategoryTabs1">
+                    <button class="category-tab active" data-category="all">All</button>
+                    <button class="category-tab" data-category="acm">ACM</button>
+                    <button class="category-tab" data-category="ieee">IEEE</button>
+                    <button class="category-tab" data-category="springer">Springer</button>
+                    <button class="category-tab" data-category="elsevier">Elsevier</button>
+                    <button class="category-tab" data-category="other">Other</button>
+                </div>
+                
+                <!-- Add Journal Form -->
+                <div class="form-group">
+                    <label>Journal Category</label>
+                    <select id="journalCategory1" class="form-control">
+                        <option value="acm">ACM Digital Library</option>
+                        <option value="ieee">IEEE Xplore</option>
+                        <option value="springer">Springer Link</option>
+                        <option value="elsevier">Elsevier ScienceDirect</option>
+                        <option value="other">Other Journals</option>
+                    </select>
+                </div>
+                
                 <div class="form-group">
                     <label>Journal Name</label>
-                    <input type="text" id="journalName" class="form-control" placeholder="Enter journal name">
+                    <input type="text" id="journalName1" class="form-control" placeholder="Enter journal name">
                 </div>
                 <div class="form-group">
                     <label>Journal URL</label>
-                    <input type="url" id="journalUrl" class="form-control" placeholder="https://example.com/journal">
+                    <input type="url" id="journalUrl1" class="form-control" placeholder="https://example.com/journal">
                 </div>
-                <button class="btn" id="addJournalLinkBtn"><i class="fas fa-plus-circle"></i> Add Journal Link</button>
+                <button class="btn" id="addJournalLinkBtn1"><i class="fas fa-plus-circle"></i> Add Research Journal</button>
                 
                 <!-- Journal List -->
                 <div style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Current Journals</h3>
-                    <div id="adminJournalsList" style="max-height: 200px; overflow-y: auto;">
-                        <!-- Admin journal list will be populated here -->
+                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Research Journals</h3>
+                    <div id="adminJournalsList1" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Research journal list will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Journal Links Management - 2 -->
+            <div class="card">
+                <h2><i class="fas fa-link"></i> Journal Links Management - Conference Proceedings</h2>
+                
+                <!-- Category Tabs -->
+                <div class="category-tabs" id="journalCategoryTabs2">
+                    <button class="category-tab active" data-category="all">All</button>
+                    <button class="category-tab" data-category="conference">Conferences</button>
+                    <button class="category-tab" data-category="symposium">Symposiums</button>
+                    <button class="category-tab" data-category="workshop">Workshops</button>
+                    <button class="category-tab" data-category="proceedings">Proceedings</button>
+                </div>
+                
+                <!-- Add Journal Form -->
+                <div class="form-group">
+                    <label>Conference Type</label>
+                    <select id="journalCategory2" class="form-control">
+                        <option value="conference">International Conference</option>
+                        <option value="symposium">Symposium</option>
+                        <option value="workshop">Workshop</option>
+                        <option value="proceedings">Conference Proceedings</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Conference/Proceedings Name</label>
+                    <input type="text" id="journalName2" class="form-control" placeholder="Enter conference or proceedings name">
+                </div>
+                <div class="form-group">
+                    <label>Conference URL</label>
+                    <input type="url" id="journalUrl2" class="form-control" placeholder="https://example.com/conference">
+                </div>
+                <button class="btn" id="addJournalLinkBtn2"><i class="fas fa-plus-circle"></i> Add Conference Link</button>
+                
+                <!-- Journal List -->
+                <div style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Conference Proceedings</h3>
+                    <div id="adminJournalsList2" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Conference journal list will be populated here -->
                     </div>
                 </div>
             </div>
@@ -1534,17 +1795,171 @@
 
         let books = [];
         let projects = {};
-        let journals = [];
+        let journals1 = []; // Research Journals
+        let journals2 = []; // Conference Proceedings
         let adminCurrentPage = 1;
-        let adminBooksPerPage = 10; // Reduced for mobile
+        let adminBooksPerPage = 10;
         let adminSearchQuery = '';
         let customBatches = [];
+        let activeCategory1 = 'all';
+        let activeCategory2 = 'all';
+
+        // ============================================
+        // ENHANCED FIREBASE FUNCTIONS FOR LARGE DATASETS
+        // ============================================
+
+        async function loadBooksFromFirebase() {
+            try {
+                showNotification('Loading books...', 'info');
+                
+                let allBooks = [];
+                let lastDoc = null;
+                let batchCount = 0;
+                const batchSize = 500;
+                
+                while (true) {
+                    let query = db.collection("books")
+                        .orderBy("addedDate", "desc")
+                        .limit(batchSize);
+                    
+                    if (lastDoc) {
+                        query = query.startAfter(lastDoc);
+                    }
+                    
+                    const querySnapshot = await query.get();
+                    
+                    if (querySnapshot.empty) {
+                        break;
+                    }
+                    
+                    batchCount++;
+                    const batchBooks = [];
+                    querySnapshot.forEach(doc => {
+                        batchBooks.push({ 
+                            id: doc.id, 
+                            ...doc.data(),
+                            addedDate: doc.data().addedDate ? doc.data().addedDate.toDate() : new Date()
+                        });
+                    });
+                    
+                    allBooks = [...allBooks, ...batchBooks];
+                    
+                    showNotification(`Loaded ${allBooks.length} books... (Batch ${batchCount})`, 'info');
+                    
+                    if (querySnapshot.size < batchSize) {
+                        break;
+                    }
+                    
+                    lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                books = allBooks;
+                console.log(`Total books loaded: ${books.length}`);
+                
+                updateStats();
+                
+                return books;
+            } catch (error) {
+                console.error("Error loading books:", error);
+                showNotification(`Error loading books: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        // Load Research Journals
+        async function loadResearchJournalsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("journals_research")
+                    .orderBy("name")
+                    .get();
+                
+                journals1 = [];
+                querySnapshot.forEach(doc => {
+                    journals1.push({ id: doc.id, ...doc.data() });
+                });
+                console.log(`Research journals loaded: ${journals1.length}`);
+                return journals1;
+            } catch (error) {
+                console.error("Error loading research journals:", error);
+                throw error;
+            }
+        }
+
+        // Load Conference Proceedings
+        async function loadConferenceJournalsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("journals_conference")
+                    .orderBy("name")
+                    .get();
+                
+                journals2 = [];
+                querySnapshot.forEach(doc => {
+                    journals2.push({ id: doc.id, ...doc.data() });
+                });
+                console.log(`Conference journals loaded: ${journals2.length}`);
+                return journals2;
+            } catch (error) {
+                console.error("Error loading conference journals:", error);
+                throw error;
+            }
+        }
+
+        // Load all journals (for backward compatibility)
+        async function loadAllJournalsFromFirebase() {
+            await Promise.all([
+                loadResearchJournalsFromFirebase(),
+                loadConferenceJournalsFromFirebase()
+            ]);
+        }
+
+        async function loadProjectsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("projects").get();
+                projects = {};
+                querySnapshot.forEach(doc => {
+                    const project = doc.data();
+                    const batch = project.batch || "2026";
+                    if (!projects[batch]) projects[batch] = [];
+                    projects[batch].push({ id: doc.id, ...project });
+                });
+                
+                querySnapshot.forEach(doc => {
+                    const project = doc.data();
+                    if (project.batch && !customBatches.includes(project.batch)) {
+                        const defaultBatches = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
+                        if (!defaultBatches.includes(project.batch) && /^\d{4}$/.test(project.batch)) {
+                            customBatches.push(project.batch);
+                        }
+                    }
+                });
+                
+                customBatches = [...new Set(customBatches)];
+                saveCustomBatches();
+                renderCustomBatches();
+                
+            } catch (error) {
+                console.error("Error loading projects:", error);
+                throw error;
+            }
+        }
+
+        async function loadScrollingMessage() {
+            try {
+                const doc = await db.collection("settings").doc("scrolling_message").get();
+                if (doc.exists && doc.data().message) {
+                    document.getElementById('newMessage').value = doc.data().message;
+                }
+            } catch (error) {
+                console.error("Error loading scrolling message:", error);
+            }
+        }
 
         // ============================================
         // CUSTOM BATCH MANAGEMENT
         // ============================================
 
-        // Load custom batches from localStorage
         function loadCustomBatches() {
             const savedBatches = localStorage.getItem('customBatches');
             if (savedBatches) {
@@ -1553,24 +1968,20 @@
             renderCustomBatches();
         }
 
-        // Save custom batches to localStorage
         function saveCustomBatches() {
             localStorage.setItem('customBatches', JSON.stringify(customBatches));
         }
 
-        // Render custom batches in the UI
         function renderCustomBatches() {
             const customBatchList = document.getElementById('customBatchList');
             const projectBatchSelect = document.getElementById('projectBatch');
             
-            // Clear existing custom batches from select
             Array.from(projectBatchSelect.options).forEach(option => {
                 if (option.value === 'custom') {
                     // Keep only the "Add Custom Batch" option
                 }
             });
             
-            // Add custom batches to select dropdown
             customBatches.forEach(batch => {
                 const optionExists = Array.from(projectBatchSelect.options).some(
                     opt => opt.value === batch
@@ -1579,13 +1990,11 @@
                     const option = document.createElement('option');
                     option.value = batch;
                     option.textContent = `${batch} Batch`;
-                    // Insert before the "custom" option
                     const customOption = projectBatchSelect.querySelector('option[value="custom"]');
                     projectBatchSelect.insertBefore(option, customOption);
                 }
             });
             
-            // Render batch tags
             customBatchList.innerHTML = '';
             customBatches.forEach(batch => {
                 if (batch !== 'custom') {
@@ -1600,7 +2009,6 @@
             });
         }
 
-        // Add custom batch
         function addCustomBatch() {
             const customBatchInput = document.getElementById('customBatchInput');
             const batchValue = customBatchInput.value.trim();
@@ -1610,7 +2018,6 @@
                 return;
             }
             
-            // Validate batch format (should be a year)
             if (!/^\d{4}$/.test(batchValue)) {
                 showNotification('Please enter a valid 4-digit year (e.g., 2050)!', 'warning');
                 return;
@@ -1622,18 +2029,15 @@
                 return;
             }
             
-            // Check if batch already exists
             if (customBatches.includes(batchValue)) {
                 showNotification(`Batch ${batchValue} already exists!`, 'warning');
                 return;
             }
             
-            // Add to custom batches
             customBatches.push(batchValue);
             saveCustomBatches();
             renderCustomBatches();
             
-            // Select the newly added batch
             document.getElementById('projectBatch').value = batchValue;
             customBatchInput.value = '';
             document.getElementById('customBatchSection').style.display = 'none';
@@ -1641,7 +2045,6 @@
             showNotification(`Batch ${batchValue} added successfully!`, 'success');
         }
 
-        // Remove custom batch
         function removeCustomBatch(batch) {
             if (confirm(`Remove batch ${batch}? This won't delete existing projects in this batch.`)) {
                 customBatches = customBatches.filter(b => b !== batch);
@@ -1652,27 +2055,33 @@
         }
 
         // ============================================
-        // DASHBOARD DATA LOADING
+        // DASHBOARD FUNCTIONS
         // ============================================
 
         async function loadDashboardData() {
             try {
                 showNotification('Loading dashboard data...', 'info');
+                updateDbStatus(true);
                 
                 await Promise.all([
                     loadBooksFromFirebase(),
                     loadProjectsFromFirebase(),
-                    loadJournalsFromFirebase(),
+                    loadAllJournalsFromFirebase(),
                     loadScrollingMessage()
                 ]);
                 
-                updateDbStatus(true);
                 loadAdminBooksList();
                 loadAdminProjectsList();
-                loadAdminJournalsList();
+                loadAdminJournalsList1();
+                loadAdminJournalsList2();
                 updateDeleteCounts();
+                updateStats();
                 
-                showNotification('Dashboard data loaded successfully!', 'success');
+                showNotification(`✅ Dashboard loaded! ${books.length} books, ${journals1.length + journals2.length} journals`, 'success');
+                
+                document.getElementById('statsLastUpdated').textContent = 
+                    new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
                 updateDbStatus(false);
@@ -1691,92 +2100,1179 @@
             }
         }
 
-        // Update delete button counts
         function updateDeleteCounts() {
             document.getElementById('booksCount').textContent = books.length;
-            document.getElementById('journalsCount').textContent = journals.length;
+            document.getElementById('journalsCount').textContent = journals1.length + journals2.length;
+        }
+
+        function updateStats() {
+            document.getElementById('statsBooksCount').textContent = books.length;
+            document.getElementById('statsJournalsCount').textContent = journals1.length + journals2.length;
+            document.getElementById('statsProjectsCount').textContent = 
+                Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
+            
+            document.getElementById('totalBookCount').textContent = books.length;
+            document.getElementById('currentBookCount').textContent = 
+                Math.min(adminBooksPerPage, books.length);
         }
 
         // ============================================
-        // FIREBASE DATA FUNCTIONS
+        // EXCEL IMPORT ENHANCED FOR 2000+ BOOKS
         // ============================================
 
-        async function loadBooksFromFirebase() {
+        document.getElementById('excelFile').addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const uploadProgress = document.getElementById('uploadProgress');
+            const uploadProgressBar = document.getElementById('uploadProgressBar');
+            const uploadStats = document.getElementById('uploadStats');
+            
+            uploadProgress.style.display = 'block';
+            uploadStats.style.display = 'flex';
+            uploadProgressBar.style.width = '0%';
+            uploadProgressBar.textContent = '0%';
+            
+            document.getElementById('processedCount').textContent = '0';
+            document.getElementById('successCount').textContent = '0';
+            document.getElementById('failedCount').textContent = '0';
+            document.getElementById('remainingCount').textContent = '0';
+
+            const importMode = document.getElementById('importMode').value;
+            const batchSize = parseInt(document.getElementById('batchSize').value);
+            const reader = new FileReader();
+
+            reader.onload = async function(event) {
+                try {
+                    showNotification('Reading Excel file...', 'info');
+                    
+                    const data = new Uint8Array(event.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const sheet = workbook.Sheets[sheetName];
+                    const rows = XLSX.utils.sheet_to_json(sheet);
+                    
+                    if (rows.length === 0) {
+                        showNotification('❌ Excel file is empty!', 'error');
+                        uploadProgress.style.display = 'none';
+                        uploadStats.style.display = 'none';
+                        return;
+                    }
+
+                    showNotification(`Found ${rows.length} rows in Excel`, 'info');
+
+                    const firstRow = rows[0];
+                    const hasTitle = firstRow.Title || row.title || firstRow['Book Title'] || firstRow['Book Title'];
+                    if (!hasTitle) {
+                        showNotification('❌ Excel file must have "Title" column!', 'error');
+                        uploadProgress.style.display = 'none';
+                        uploadStats.style.display = 'none';
+                        return;
+                    }
+
+                    const bookDataArray = [];
+                    let validRows = 0;
+                    
+                    for (let i = 0; i < rows.length; i++) {
+                        const row = rows[i];
+                        
+                        const title = String(
+                            row.Title || 
+                            row.title || 
+                            row['Book Title'] || 
+                            row['Book Title'] || 
+                            ''
+                        ).trim();
+                        
+                        if (!title) continue;
+                        
+                        const author = String(
+                            row.Author || 
+                            row.author || 
+                            row['Author Name'] || 
+                            row['Author'] || 
+                            'Unknown'
+                        ).trim();
+                        
+                        let status = String(
+                            row.Status || 
+                            row.status || 
+                            row.Availability || 
+                            row.availability ||
+                            "available"
+                        ).toLowerCase().trim();
+                        
+                        if (!['available', 'unavailable'].includes(status)) {
+                            status = 'available';
+                        }
+                        
+                        const isbn = String(
+                            row.ISBN || 
+                            row.isbn || 
+                            row['ISBN Number'] || 
+                            row['ISBN'] ||
+                            ""
+                        ).trim();
+                        
+                        let year = row.Year || row.year || row.Year || new Date().getFullYear();
+                        if (typeof year === 'string') {
+                            year = parseInt(year) || new Date().getFullYear();
+                        }
+                        if (year < 1800 || year > 2100) {
+                            year = new Date().getFullYear();
+                        }
+
+                        const bookData = {
+                            title: title,
+                            author: author,
+                            status: status,
+                            isbn: isbn,
+                            year: year
+                        };
+
+                        bookDataArray.push(bookData);
+                        validRows++;
+                    }
+
+                    showNotification(`Processing ${validRows} valid books...`, 'info');
+                    document.getElementById('remainingCount').textContent = validRows;
+
+                    if (importMode === 'replace' && books.length > 0) {
+                        const confirmation = confirm(`Replace ${books.length} existing books with ${validRows} new books?`);
+                        if (confirmation) {
+                            showNotification('Clearing existing books...', 'info');
+                            const deleteBatchSize = 500;
+                            for (let i = 0; i < books.length; i += deleteBatchSize) {
+                                const batch = db.batch();
+                                const chunk = books.slice(i, i + deleteBatchSize);
+                                chunk.forEach(book => {
+                                    const docRef = db.collection("books").doc(book.id);
+                                    batch.delete(docRef);
+                                });
+                                await batch.commit();
+                                await new Promise(resolve => setTimeout(resolve, 300));
+                            }
+                            books = [];
+                        } else {
+                            showNotification('Import cancelled', 'info');
+                            uploadProgress.style.display = 'none';
+                            uploadStats.style.display = 'none';
+                            return;
+                        }
+                    }
+
+                    const result = await importBooksBatch(bookDataArray, batchSize);
+                    
+                    uploadProgressBar.style.width = '100%';
+                    uploadProgressBar.textContent = '100%';
+                    
+                    await loadBooksFromFirebase();
+                    loadAdminBooksList();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    setTimeout(() => {
+                        uploadProgress.style.display = 'none';
+                        uploadStats.style.display = 'none';
+                    }, 2000);
+                    
+                    showNotification(`✅ Import Complete!\n\n` +
+                          `• Total rows processed: ${rows.length}\n` +
+                          `• Valid books: ${validRows}\n` +
+                          `• Successfully imported: ${result.successCount}\n` +
+                          `• Failed: ${result.failedCount}\n` +
+                          `• Total books now: ${books.length}`, 'success');
+
+                } catch (error) {
+                    console.error('Excel import error:', error);
+                    uploadProgress.style.display = 'none';
+                    uploadStats.style.display = 'none';
+                    showNotification(`❌ Error importing Excel file:\n${error.message}`, 'error');
+                }
+            };
+
+            reader.onerror = function() {
+                uploadProgress.style.display = 'none';
+                uploadStats.style.display = 'none';
+                showNotification('❌ Error reading the Excel file', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
+            e.target.value = '';
+        });
+
+        async function importBooksBatch(bookDataArray, batchSize = 200) {
             try {
-                const querySnapshot = await db.collection("books")
-                    .orderBy("addedDate", "desc")
-                    .get();
+                const totalBooks = bookDataArray.length;
+                let successCount = 0;
+                let failedCount = 0;
                 
-                books = [];
-                querySnapshot.forEach(doc => {
-                    books.push({ id: doc.id, ...doc.data() });
-                });
+                for (let i = 0; i < totalBooks; i += batchSize) {
+                    const batch = bookDataArray.slice(i, i + batchSize);
+                    const batchNumber = Math.floor(i / batchSize) + 1;
+                    const totalBatches = Math.ceil(totalBooks / batchSize);
+                    
+                    const progress = Math.round((i / totalBooks) * 100);
+                    document.getElementById('uploadProgressBar').style.width = `${progress}%`;
+                    document.getElementById('uploadProgressBar').textContent = `${progress}%`;
+                    
+                    document.getElementById('processedCount').textContent = i + batch.length;
+                    document.getElementById('remainingCount').textContent = totalBooks - (i + batch.length);
+                    
+                    showNotification(`Processing batch ${batchNumber}/${totalBatches}...`, 'info');
+                    
+                    const batchWrite = db.batch();
+                    const booksCollection = db.collection("books");
+                    
+                    batch.forEach(bookData => {
+                        const docRef = booksCollection.doc();
+                        const bookWithMetadata = {
+                            ...bookData,
+                            addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            addedBy: auth.currentUser.email,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            importedFromExcel: true,
+                            importDate: new Date().toISOString()
+                        };
+                        batchWrite.set(docRef, bookWithMetadata);
+                    });
+                    
+                    try {
+                        await batchWrite.commit();
+                        successCount += batch.length;
+                        document.getElementById('successCount').textContent = successCount;
+                    } catch (batchError) {
+                        console.error(`Error in batch ${batchNumber}:`, batchError);
+                        failedCount += batch.length;
+                        document.getElementById('failedCount').textContent = failedCount;
+                        
+                        for (const bookData of batch) {
+                            try {
+                                await db.collection("books").add({
+                                    ...bookData,
+                                    addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                                    addedBy: auth.currentUser.email,
+                                    importedFromExcel: true
+                                });
+                                successCount++;
+                            } catch (individualError) {
+                                failedCount++;
+                                console.error("Individual book error:", individualError);
+                            }
+                        }
+                    }
+                    
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                return { successCount, failedCount };
             } catch (error) {
-                console.error("Error loading books:", error);
+                console.error("Batch import error:", error);
                 throw error;
             }
         }
 
-        async function loadProjectsFromFirebase() {
+        // Download sample Excel template
+        document.getElementById('downloadSampleBtn').addEventListener('click', function() {
             try {
-                const querySnapshot = await db.collection("projects").get();
-                projects = {};
-                querySnapshot.forEach(doc => {
-                    const project = doc.data();
-                    const batch = project.batch || "2026";
-                    if (!projects[batch]) projects[batch] = [];
-                    projects[batch].push({ id: doc.id, ...project });
+                const sampleData = [
+                    {
+                        "Title": "Digital Signal Processing",
+                        "Author": "John G. Proakis",
+                        "Status": "available",
+                        "ISBN": "9780131873742",
+                        "Year": 2007
+                    },
+                    {
+                        "Title": "Communication Systems",
+                        "Author": "Simon Haykin",
+                        "Status": "available", 
+                        "ISBN": "9780471697909",
+                        "Year": 2009
+                    },
+                    {
+                        "Title": "Electronic Devices and Circuit Theory",
+                        "Author": "Robert L. Boylestad",
+                        "Status": "unavailable",
+                        "ISBN": "9780132622264",
+                        "Year": 2012
+                    }
+                ];
+                
+                const ws = XLSX.utils.json_to_sheet(sampleData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Books");
+                
+                const wscols = [
+                    { wch: 40 },
+                    { wch: 30 },
+                    { wch: 15 },
+                    { wch: 20 },
+                    { wch: 10 }
+                ];
+                ws['!cols'] = wscols;
+                
+                XLSX.writeFile(wb, "ECE_Library_Excel_Template.xlsx");
+                showNotification('✅ Sample Excel template downloaded!', 'success');
+            } catch (error) {
+                console.error('Error downloading sample:', error);
+                showNotification('❌ Error downloading sample template', 'error');
+            }
+        });
+
+        // ============================================
+        // DELETE FUNCTIONS
+        // ============================================
+
+        async function deleteBooksOnly() {
+            if (books.length === 0) {
+                showNotification('No books to delete!', 'warning');
+                return;
+            }
+            
+            const confirmation = prompt(`⚠️ DELETE ALL ${books.length} BOOKS?\n\nType "DELETE ${books.length} BOOKS" to confirm`);
+            
+            if (confirmation === `DELETE ${books.length} BOOKS`) {
+                try {
+                    showNotification(`Deleting ${books.length} books...`, 'info');
+                    
+                    const batchSize = 500;
+                    for (let i = 0; i < books.length; i += batchSize) {
+                        const batch = db.batch();
+                        const chunk = books.slice(i, i + batchSize);
+                        chunk.forEach(book => {
+                            const docRef = db.collection("books").doc(book.id);
+                            batch.delete(docRef);
+                        });
+                        await batch.commit();
+                        
+                        const progress = Math.round((Math.min(i + batchSize, books.length) / books.length) * 100);
+                        showNotification(`Deleting... ${progress}% complete`, 'info');
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                    
+                    await loadBooksFromFirebase();
+                    loadAdminBooksList();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    showNotification(`✅ Successfully deleted ${books.length} books!`, 'success');
+                } catch (error) {
+                    console.error('Error deleting books:', error);
+                    showNotification('❌ Failed to delete books', 'error');
+                }
+            } else {
+                showNotification('Book deletion cancelled', 'info');
+            }
+        }
+
+        async function deleteJournalsOnly() {
+            const totalJournals = journals1.length + journals2.length;
+            if (totalJournals === 0) {
+                showNotification('No journals to delete!', 'warning');
+                return;
+            }
+            
+            const confirmation = prompt(`⚠️ DELETE ALL ${totalJournals} JOURNAL LINKS?\n\nType "DELETE ${totalJournals} JOURNALS" to confirm`);
+            
+            if (confirmation === `DELETE ${totalJournals} JOURNALS`) {
+                try {
+                    showNotification(`Deleting ${totalJournals} journals...`, 'info');
+                    
+                    // Delete research journals
+                    if (journals1.length > 0) {
+                        const batch1 = db.batch();
+                        journals1.forEach(journal => {
+                            const docRef = db.collection("journals_research").doc(journal.id);
+                            batch1.delete(docRef);
+                        });
+                        await batch1.commit();
+                    }
+                    
+                    // Delete conference journals
+                    if (journals2.length > 0) {
+                        const batch2 = db.batch();
+                        journals2.forEach(journal => {
+                            const docRef = db.collection("journals_conference").doc(journal.id);
+                            batch2.delete(docRef);
+                        });
+                        await batch2.commit();
+                    }
+                    
+                    await loadAllJournalsFromFirebase();
+                    loadAdminJournalsList1();
+                    loadAdminJournalsList2();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    showNotification(`✅ Successfully deleted ${totalJournals} journal links!`, 'success');
+                } catch (error) {
+                    console.error('Error deleting journals:', error);
+                    showNotification('❌ Failed to delete journals', 'error');
+                }
+            } else {
+                showNotification('Journal deletion cancelled', 'info');
+            }
+        }
+
+        async function deleteProjectsByBatch() {
+            const modal = document.getElementById('deleteProjectsModal');
+            const batchGrid = document.getElementById('batchSelectionGrid');
+            
+            const allBatches = Object.keys(projects).sort((a, b) => b - a);
+            
+            if (allBatches.length === 0) {
+                showNotification('No projects to delete!', 'warning');
+                return;
+            }
+            
+            batchGrid.innerHTML = '';
+            allBatches.forEach(batch => {
+                const projectCount = projects[batch] ? projects[batch].length : 0;
+                if (projectCount > 0) {
+                    const checkboxDiv = document.createElement('div');
+                    checkboxDiv.className = 'batch-checkbox';
+                    checkboxDiv.innerHTML = `
+                        <input type="checkbox" id="batch-${batch}" value="${batch}" data-count="${projectCount}">
+                        <label for="batch-${batch}">${batch} (${projectCount})</label>
+                    `;
+                    batchGrid.appendChild(checkboxDiv);
+                }
+            });
+            
+            document.getElementById('selectAllBatches').addEventListener('change', function() {
+                const checkboxes = batchGrid.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(cb => cb.checked = this.checked);
+                updateSelectedBatchesInfo();
+            });
+            
+            batchGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', updateSelectedBatchesInfo);
+            });
+            
+            updateSelectedBatchesInfo();
+            modal.style.display = 'flex';
+        }
+
+        function updateSelectedBatchesInfo() {
+            const checkboxes = document.querySelectorAll('#batchSelectionGrid input[type="checkbox"]:checked');
+            const selectedBatches = Array.from(checkboxes).map(cb => cb.value);
+            const totalProjects = Array.from(checkboxes).reduce((sum, cb) => sum + parseInt(cb.dataset.count), 0);
+            
+            document.getElementById('selectedBatchesInfo').textContent = 
+                `Selected: ${selectedBatches.length} batches`;
+            document.getElementById('projectsCountInfo').textContent = 
+                `${totalProjects} projects will be deleted`;
+        }
+
+        async function clearAllData() {
+            const totalBooks = books.length;
+            const totalJournals = journals1.length + journals2.length;
+            const totalProjects = Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
+            const totalItems = totalBooks + totalJournals + totalProjects;
+            
+            if (totalItems === 0) {
+                showNotification('No data to clear!', 'warning');
+                return;
+            }
+            
+            const confirmation = prompt(`⚠️ NUKE EVERYTHING?\n\n` +
+                   `This will delete:\n` +
+                   `• ${totalBooks} books\n` +
+                   `• ${totalJournals} journals\n` +
+                   `• ${totalProjects} projects\n` +
+                   `• Scrolling message\n\n` +
+                   `Type "NUKE ${totalItems} ITEMS" to confirm`);
+            
+            if (confirmation === `NUKE ${totalItems} ITEMS`) {
+                try {
+                    showNotification('Deleting ALL data...', 'info');
+                    
+                    if (totalBooks > 0) {
+                        const deleteBatchSize = 500;
+                        for (let i = 0; i < books.length; i += deleteBatchSize) {
+                            const batch = db.batch();
+                            const chunk = books.slice(i, i + deleteBatchSize);
+                            chunk.forEach(book => {
+                                const docRef = db.collection("books").doc(book.id);
+                                batch.delete(docRef);
+                            });
+                            await batch.commit();
+                            await new Promise(resolve => setTimeout(resolve, 300));
+                        }
+                    }
+                    
+                    if (totalJournals > 0) {
+                        // Delete research journals
+                        if (journals1.length > 0) {
+                            const batch1 = db.batch();
+                            journals1.forEach(journal => {
+                                const docRef = db.collection("journals_research").doc(journal.id);
+                                batch1.delete(docRef);
+                            });
+                            await batch1.commit();
+                        }
+                        
+                        // Delete conference journals
+                        if (journals2.length > 0) {
+                            const batch2 = db.batch();
+                            journals2.forEach(journal => {
+                                const docRef = db.collection("journals_conference").doc(journal.id);
+                                batch2.delete(docRef);
+                            });
+                            await batch2.commit();
+                        }
+                    }
+                    
+                    if (totalProjects > 0) {
+                        const projectsBatch = db.batch();
+                        Object.values(projects).forEach(batchProjects => {
+                            batchProjects.forEach(project => {
+                                const docRef = db.collection("projects").doc(project.id);
+                                projectsBatch.delete(docRef);
+                            });
+                        });
+                        await projectsBatch.commit();
+                    }
+                    
+                    customBatches = [];
+                    saveCustomBatches();
+                    renderCustomBatches();
+                    
+                    await db.collection("settings").doc("scrolling_message").set({
+                        message: "📚 DEPARTMENT OF ELECTRONICS AND COMMUNICATION ENGINEERING DIGITAL LIBRARY",
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: auth.currentUser.email
+                    });
+                    
+                    await loadDashboardData();
+                    showNotification('✅ All data has been cleared successfully!', 'success');
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    showNotification('❌ Error clearing data', 'error');
+                }
+            } else {
+                showNotification('Data clearance cancelled', 'info');
+            }
+        }
+
+        // ============================================
+        // JOURNAL MANAGEMENT FUNCTIONS
+        // ============================================
+
+        // Add Research Journal
+        async function addResearchJournal() {
+            const category = document.getElementById('journalCategory1').value;
+            const name = document.getElementById('journalName1').value;
+            const url = document.getElementById('journalUrl1').value;
+           
+            if (name && url) {
+                try {
+                    const journalData = {
+                        name: name,
+                        url: url,
+                        category: category,
+                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        addedBy: auth.currentUser.email
+                    };
+                    
+                    await db.collection("journals_research").add(journalData);
+                    await loadResearchJournalsFromFirebase();
+                    loadAdminJournalsList1();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    document.getElementById('journalName1').value = '';
+                    document.getElementById('journalUrl1').value = '';
+                    
+                    showNotification(`Research journal "${name}" added successfully!`, 'success');
+                } catch (error) {
+                    console.error('Error adding research journal:', error);
+                    showNotification('Failed to add research journal', 'error');
+                }
+            } else {
+                showNotification('Please enter journal name and URL!', 'warning');
+            }
+        }
+
+        // Add Conference Journal
+        async function addConferenceJournal() {
+            const category = document.getElementById('journalCategory2').value;
+            const name = document.getElementById('journalName2').value;
+            const url = document.getElementById('journalUrl2').value;
+           
+            if (name && url) {
+                try {
+                    const journalData = {
+                        name: name,
+                        url: url,
+                        category: category,
+                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        addedBy: auth.currentUser.email
+                    };
+                    
+                    await db.collection("journals_conference").add(journalData);
+                    await loadConferenceJournalsFromFirebase();
+                    loadAdminJournalsList2();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    document.getElementById('journalName2').value = '';
+                    document.getElementById('journalUrl2').value = '';
+                    
+                    showNotification(`Conference proceedings "${name}" added successfully!`, 'success');
+                } catch (error) {
+                    console.error('Error adding conference journal:', error);
+                    showNotification('Failed to add conference journal', 'error');
+                }
+            } else {
+                showNotification('Please enter conference name and URL!', 'warning');
+            }
+        }
+
+        // Get category badge HTML
+        function getCategoryBadge(category) {
+            const badges = {
+                'acm': '<span class="journal-category-badge badge-acm">ACM</span>',
+                'ieee': '<span class="journal-category-badge badge-ieee">IEEE</span>',
+                'springer': '<span class="journal-category-badge badge-springer">Springer</span>',
+                'elsevier': '<span class="journal-category-badge badge-elsevier">Elsevier</span>',
+                'conference': '<span class="journal-category-badge badge-springer">Conference</span>',
+                'symposium': '<span class="journal-category-badge badge-elsevier">Symposium</span>',
+                'workshop': '<span class="journal-category-badge badge-acm">Workshop</span>',
+                'proceedings': '<span class="journal-category-badge badge-ieee">Proceedings</span>',
+                'other': '<span class="journal-category-badge badge-other">Other</span>'
+            };
+            return badges[category] || '<span class="journal-category-badge badge-other">Other</span>';
+        }
+
+        // Get category display name
+        function getCategoryName(category) {
+            const names = {
+                'acm': 'ACM Digital Library',
+                'ieee': 'IEEE Xplore',
+                'springer': 'Springer Link',
+                'elsevier': 'Elsevier ScienceDirect',
+                'conference': 'International Conference',
+                'symposium': 'Symposium',
+                'workshop': 'Workshop',
+                'proceedings': 'Conference Proceedings',
+                'other': 'Other Journals'
+            };
+            return names[category] || 'Other';
+        }
+
+        // Load Research Journals List
+        function loadAdminJournalsList1() {
+            const adminJournalsList = document.getElementById('adminJournalsList1');
+            adminJournalsList.innerHTML = '';
+           
+            let filteredJournals = journals1;
+            if (activeCategory1 !== 'all') {
+                filteredJournals = journals1.filter(journal => journal.category === activeCategory1);
+            }
+           
+            if (filteredJournals.length === 0) {
+                const message = activeCategory1 !== 'all' 
+                    ? `No ${getCategoryName(activeCategory1)} journals`
+                    : 'No research journals available';
+                adminJournalsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${message}</p>`;
+                return;
+            }
+           
+            filteredJournals.forEach(journal => {
+                const journalItem = document.createElement('div');
+                journalItem.style.padding = '12px';
+                journalItem.style.borderBottom = '1px solid #eee';
+                journalItem.style.display = 'flex';
+                journalItem.style.justifyContent = 'space-between';
+                journalItem.style.alignItems = 'center';
+                
+                journalItem.innerHTML = `
+                    <div style="flex: 1; min-width: 0;">
+                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">
+                            ${journal.name} ${getCategoryBadge(journal.category)}
+                        </strong>
+                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
+                            ${journal.url}
+                        </div>
+                    </div>
+                    <div style="margin-left: 10px;">
+                        <button class="action-btn delete-btn" onclick="deleteSingleResearchJournal('${journal.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                adminJournalsList.appendChild(journalItem);
+            });
+        }
+
+        // Load Conference Journals List
+        function loadAdminJournalsList2() {
+            const adminJournalsList = document.getElementById('adminJournalsList2');
+            adminJournalsList.innerHTML = '';
+           
+            let filteredJournals = journals2;
+            if (activeCategory2 !== 'all') {
+                filteredJournals = journals2.filter(journal => journal.category === activeCategory2);
+            }
+           
+            if (filteredJournals.length === 0) {
+                const message = activeCategory2 !== 'all' 
+                    ? `No ${getCategoryName(activeCategory2)} links`
+                    : 'No conference proceedings available';
+                adminJournalsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${message}</p>`;
+                return;
+            }
+           
+            filteredJournals.forEach(journal => {
+                const journalItem = document.createElement('div');
+                journalItem.style.padding = '12px';
+                journalItem.style.borderBottom = '1px solid #eee';
+                journalItem.style.display = 'flex';
+                journalItem.style.justifyContent = 'space-between';
+                journalItem.style.alignItems = 'center';
+                
+                journalItem.innerHTML = `
+                    <div style="flex: 1; min-width: 0;">
+                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">
+                            ${journal.name} ${getCategoryBadge(journal.category)}
+                        </strong>
+                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
+                            ${journal.url}
+                        </div>
+                    </div>
+                    <div style="margin-left: 10px;">
+                        <button class="action-btn delete-btn" onclick="deleteSingleConferenceJournal('${journal.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                adminJournalsList.appendChild(journalItem);
+            });
+        }
+
+        // Delete Single Research Journal
+        async function deleteSingleResearchJournal(journalId) {
+            if (confirm('Are you sure you want to delete this research journal link?')) {
+                try {
+                    await db.collection("journals_research").doc(journalId).delete();
+                    await loadResearchJournalsFromFirebase();
+                    loadAdminJournalsList1();
+                    updateDeleteCounts();
+                    updateStats();
+                    showNotification('Research journal deleted successfully!', 'success');
+                } catch (error) {
+                    console.error('Error deleting research journal:', error);
+                    showNotification('Failed to delete research journal', 'error');
+                }
+            }
+        }
+
+        // Delete Single Conference Journal
+        async function deleteSingleConferenceJournal(journalId) {
+            if (confirm('Are you sure you want to delete this conference proceedings link?')) {
+                try {
+                    await db.collection("journals_conference").doc(journalId).delete();
+                    await loadConferenceJournalsFromFirebase();
+                    loadAdminJournalsList2();
+                    updateDeleteCounts();
+                    updateStats();
+                    showNotification('Conference proceedings deleted successfully!', 'success');
+                } catch (error) {
+                    console.error('Error deleting conference journal:', error);
+                    showNotification('Failed to delete conference journal', 'error');
+                }
+            }
+        }
+
+        // Initialize category tabs
+        function initCategoryTabs() {
+            // Research Journals Tabs
+            const tabs1 = document.querySelectorAll('#journalCategoryTabs1 .category-tab');
+            tabs1.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs1.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    activeCategory1 = this.getAttribute('data-category');
+                    loadAdminJournalsList1();
+                });
+            });
+
+            // Conference Proceedings Tabs
+            const tabs2 = document.querySelectorAll('#journalCategoryTabs2 .category-tab');
+            tabs2.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs2.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    activeCategory2 = this.getAttribute('data-category');
+                    loadAdminJournalsList2();
+                });
+            });
+        }
+
+        // ============================================
+        // MOBILE MENU FUNCTIONALITY
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileAdminMenu = document.getElementById('mobileAdminMenu');
+            
+            if (mobileMenuBtn && mobileAdminMenu) {
+                mobileMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileAdminMenu.classList.toggle('show');
                 });
                 
-                // Add custom batches from projects to our list
-                querySnapshot.forEach(doc => {
-                    const project = doc.data();
-                    if (project.batch && !customBatches.includes(project.batch)) {
-                        // Check if it's a custom batch (not in default list)
-                        const defaultBatches = ['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018'];
-                        if (!defaultBatches.includes(project.batch) && /^\d{4}$/.test(project.batch)) {
-                            customBatches.push(project.batch);
-                        }
+                document.addEventListener('click', function(e) {
+                    if (!mobileMenuBtn.contains(e.target) && !mobileAdminMenu.contains(e.target)) {
+                        mobileAdminMenu.classList.remove('show');
                     }
                 });
                 
-                // Remove duplicates and save
-                customBatches = [...new Set(customBatches)];
-                saveCustomBatches();
-                renderCustomBatches();
-                
-            } catch (error) {
-                console.error("Error loading projects:", error);
-                throw error;
-            }
-        }
-
-        async function loadJournalsFromFirebase() {
-            try {
-                const querySnapshot = await db.collection("journals")
-                    .orderBy("name")
-                    .get();
-                
-                journals = [];
-                querySnapshot.forEach(doc => {
-                    journals.push({ id: doc.id, ...doc.data() });
+                mobileAdminMenu.querySelectorAll('.mobile-menu-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        mobileAdminMenu.classList.remove('show');
+                    });
                 });
-            } catch (error) {
-                console.error("Error loading journals:", error);
-                throw error;
             }
-        }
-
-        async function loadScrollingMessage() {
-            try {
-                const doc = await db.collection("settings").doc("scrolling_message").get();
-                if (doc.exists && doc.data().message) {
-                    document.getElementById('newMessage').value = doc.data().message;
+            
+            loadCustomBatches();
+            initCategoryTabs();
+            
+            document.getElementById('projectBatch').addEventListener('change', function() {
+                const customBatchSection = document.getElementById('customBatchSection');
+                if (this.value === 'custom') {
+                    customBatchSection.style.display = 'flex';
+                    document.getElementById('customBatchInput').focus();
+                } else {
+                    customBatchSection.style.display = 'none';
                 }
-            } catch (error) {
-                console.error("Error loading scrolling message:", error);
+            });
+            
+            document.getElementById('addCustomBatchBtn').addEventListener('click', addCustomBatch);
+            
+            document.getElementById('customBatchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addCustomBatch();
+                }
+            });
+            
+            function setVH() {
+                let vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
             }
-        }
+            
+            setVH();
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', setVH);
+        });
+
+        // ============================================
+        // DOM ELEMENTS & EVENT LISTENERS
+        // ============================================
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        const syncDataBtn = document.getElementById('syncDataBtn');
+        const refreshBooksBtn = document.getElementById('refreshBooksBtn');
+        const deleteBooksBtn = document.getElementById('deleteBooksBtn');
+        const deleteJournalsBtn = document.getElementById('deleteJournalsBtn');
+        const deleteProjectsByBatchBtn = document.getElementById('deleteProjectsByBatchBtn');
+        const clearAllDataBtn = document.getElementById('clearAllDataBtn');
+        const confirmDeleteProjects = document.getElementById('confirmDeleteProjects');
+        const closeProjectsModal = document.getElementById('closeProjectsModal');
+        const deleteProjectsModal = document.getElementById('deleteProjectsModal');
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                localStorage.clear();
+                window.location.href = 'adminlogin.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // Sync data
+        syncDataBtn.addEventListener('click', loadDashboardData);
+
+        // Refresh books
+        refreshBooksBtn.addEventListener('click', async () => {
+            showNotification('Refreshing books...', 'info');
+            await loadBooksFromFirebase();
+            loadAdminBooksList();
+            updateStats();
+            showNotification('Books refreshed!', 'success');
+        });
+
+        // Delete books only
+        deleteBooksBtn.addEventListener('click', deleteBooksOnly);
+
+        // Delete journals only
+        deleteJournalsBtn.addEventListener('click', deleteJournalsOnly);
+
+        // Delete projects by batch
+        deleteProjectsByBatchBtn.addEventListener('click', deleteProjectsByBatch);
+
+        // Clear all data
+        clearAllDataBtn.addEventListener('click', clearAllData);
+
+        // Confirm delete selected projects
+        confirmDeleteProjects.addEventListener('click', async () => {
+            const checkboxes = document.querySelectorAll('#batchSelectionGrid input[type="checkbox"]:checked');
+            const selectedBatches = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (selectedBatches.length === 0) {
+                showNotification('Please select at least one batch!', 'warning');
+                return;
+            }
+            
+            let totalProjects = 0;
+            selectedBatches.forEach(batch => {
+                totalProjects += projects[batch] ? projects[batch].length : 0;
+            });
+            
+            const confirmation = prompt(`⚠️ DELETE ${totalProjects} PROJECTS FROM ${selectedBatches.length} BATCHES?\n\n` +
+                   `Selected batches: ${selectedBatches.join(', ')}\n\n` +
+                   `Type "DELETE ${totalProjects} PROJECTS" to confirm`);
+            
+            if (confirmation === `DELETE ${totalProjects} PROJECTS`) {
+                try {
+                    showNotification(`Deleting projects from ${selectedBatches.length} batches...`, 'info');
+                    
+                    let projectsToDelete = [];
+                    selectedBatches.forEach(batch => {
+                        if (projects[batch]) {
+                            projects[batch].forEach(project => {
+                                projectsToDelete.push({ id: project.id, batch: batch });
+                            });
+                        }
+                    });
+                    
+                    const batchSize = 500;
+                    for (let i = 0; i < projectsToDelete.length; i += batchSize) {
+                        const batch = db.batch();
+                        const chunk = projectsToDelete.slice(i, i + batchSize);
+                        
+                        chunk.forEach(project => {
+                            const docRef = db.collection("projects").doc(project.id);
+                            batch.delete(docRef);
+                        });
+                        
+                        await batch.commit();
+                    }
+                    
+                    deleteProjectsModal.style.display = 'none';
+                    await loadProjectsFromFirebase();
+                    loadAdminProjectsList();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    showNotification(`✅ Successfully deleted ${totalProjects} projects from ${selectedBatches.length} batches!`, 'success');
+                } catch (error) {
+                    console.error('Error deleting projects:', error);
+                    showNotification('❌ Failed to delete projects', 'error');
+                }
+            } else {
+                showNotification('Project deletion cancelled', 'info');
+            }
+        });
+
+        // Close projects modal
+        closeProjectsModal.addEventListener('click', () => {
+            deleteProjectsModal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === deleteProjectsModal) {
+                deleteProjectsModal.style.display = 'none';
+            }
+            if (e.target === editBookModal) {
+                editBookModal.style.display = 'none';
+            }
+        });
+
+        // ============================================
+        // BOOK MANAGEMENT EVENT LISTENERS
+        // ============================================
+
+        const addBookBtn = document.getElementById('addBookBtn');
+        const updateBookBtn = document.getElementById('updateBookBtn');
+        const addJournalLinkBtn1 = document.getElementById('addJournalLinkBtn1');
+        const addJournalLinkBtn2 = document.getElementById('addJournalLinkBtn2');
+        const exportBooksBtn = document.getElementById('exportBooksBtn');
+        const editBookModal = document.getElementById('editBookModal');
+        const closeEditModal = document.getElementById('closeEditModal');
+        const saveBookChanges = document.getElementById('saveBookChanges');
+        const adminBookSearch = document.getElementById('adminBookSearch');
+        const adminBookSearchBtn = document.getElementById('adminBookSearchBtn');
+        const updateMessageBtn = document.getElementById('updateMessageBtn');
+
+        // Add book
+        addBookBtn.addEventListener('click', async () => {
+            const title = prompt("Enter book title:");
+            const author = prompt("Enter author name:");
+           
+            if (title && author) {
+                const newBook = {
+                    title: title,
+                    author: author,
+                    status: 'available',
+                    isbn: '',
+                    year: new Date().getFullYear()
+                };
+                
+                try {
+                    await addBookToFirebase(newBook);
+                    await loadBooksFromFirebase();
+                    loadAdminBooksList();
+                    updateDeleteCounts();
+                    updateStats();
+                } catch (error) {
+                    console.error('Error adding book:', error);
+                }
+            }
+        });
+
+        // Add book from form
+        updateBookBtn.addEventListener('click', async () => {
+            const title = document.getElementById('bookTitle').value;
+            const author = document.getElementById('bookAuthor').value;
+            const status = document.getElementById('bookStatus').value;
+            const isbn = document.getElementById('bookIsbn').value;
+            const year = document.getElementById('bookYear').value;
+           
+            if (!title || !author) {
+                showNotification('Please enter book title and author!', 'warning');
+                return;
+            }
+            
+            const bookData = {
+                title: title.trim(),
+                author: author.trim(),
+                status: status,
+                isbn: isbn.trim(),
+                year: year ? parseInt(year) : new Date().getFullYear()
+            };
+            
+            try {
+                await addBookToFirebase(bookData);
+                await loadBooksFromFirebase();
+                loadAdminBooksList();
+                updateDeleteCounts();
+                updateStats();
+                
+                document.getElementById('bookTitle').value = '';
+                document.getElementById('bookAuthor').value = '';
+                document.getElementById('bookIsbn').value = '';
+                document.getElementById('bookYear').value = '';
+            } catch (error) {
+                console.error('Error adding book:', error);
+            }
+        });
+
+        // Edit book modal
+        closeEditModal.addEventListener('click', () => {
+            editBookModal.style.display = 'none';
+        });
+
+        saveBookChanges.addEventListener('click', async () => {
+            const title = document.getElementById('editBookTitle').value;
+            const author = document.getElementById('editBookAuthor').value;
+            const status = document.getElementById('editBookStatus').value;
+            const isbn = document.getElementById('editBookIsbn').value;
+            const year = document.getElementById('editBookYear').value;
+            const bookId = document.getElementById('editBookId').value;
+           
+            if (title && author && bookId) {
+                const bookData = {
+                    title: title,
+                    author: author,
+                    status: status,
+                    isbn: isbn,
+                    year: year ? parseInt(year) : undefined
+                };
+                
+                try {
+                    await updateBookInFirebase(bookId, bookData);
+                    await loadBooksFromFirebase();
+                    loadAdminBooksList();
+                    editBookModal.style.display = 'none';
+                } catch (error) {
+                    console.error('Error updating book:', error);
+                }
+            }
+        });
+
+        // Add research journal link
+        addJournalLinkBtn1.addEventListener('click', addResearchJournal);
+
+        // Add conference journal link
+        addJournalLinkBtn2.addEventListener('click', addConferenceJournal);
+
+        // Export books to Excel
+        exportBooksBtn.addEventListener('click', () => {
+            if (books.length === 0) {
+                showNotification('No books to export!', 'warning');
+                return;
+            }
+            
+            try {
+                const exportData = books.map(book => ({
+                    'Title': book.title,
+                    'Author': book.author,
+                    'Status': book.status,
+                    'ISBN': book.isbn || '',
+                    'Year': book.year || '',
+                    'Added Date': book.addedDate ? book.addedDate.toLocaleDateString() : '',
+                    'Added By': book.addedBy || ''
+                }));
+                
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Books");
+                
+                const wscols = [
+                    { wch: 50 },
+                    { wch: 30 },
+                    { wch: 15 },
+                    { wch: 20 },
+                    { wch: 10 },
+                    { wch: 15 },
+                    { wch: 25 }
+                ];
+                ws['!cols'] = wscols;
+                
+                const date = new Date();
+                const filename = `ECE_Library_Books_${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}.xlsx`;
+                
+                XLSX.writeFile(wb, filename);
+                showNotification(`✅ Exported ${books.length} books to Excel`, 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification('❌ Error exporting books', 'error');
+            }
+        });
+
+        // Update scrolling message
+        updateMessageBtn.addEventListener('click', async () => {
+            const newMessage = document.getElementById('newMessage').value;
+            if (newMessage) {
+                try {
+                    await db.collection("settings").doc("scrolling_message").set({
+                        message: newMessage,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedBy: auth.currentUser.email
+                    });
+                    showNotification('Scrolling message updated successfully!', 'success');
+                } catch (error) {
+                    console.error('Error updating message:', error);
+                    showNotification('Failed to update message', 'error');
+                }
+            }
+        });
 
         // ============================================
         // BOOK MANAGEMENT FUNCTIONS
@@ -1830,788 +3326,6 @@
         }
 
         // ============================================
-        // EXCEL UPLOAD FUNCTIONALITY
-        // ============================================
-
-        // Excel file upload handler
-        document.getElementById('excelFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const uploadProgress = document.getElementById('uploadProgress');
-            const uploadProgressBar = document.getElementById('uploadProgressBar');
-            
-            uploadProgress.style.display = 'block';
-            uploadProgressBar.style.width = '0%';
-            uploadProgressBar.textContent = '0%';
-
-            const importMode = document.getElementById('importMode').value;
-            const reader = new FileReader();
-
-            reader.onload = async function(event) {
-                try {
-                    const data = new Uint8Array(event.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const sheet = workbook.Sheets[sheetName];
-                    const rows = XLSX.utils.sheet_to_json(sheet);
-                    
-                    let added = 0;
-                    let errors = 0;
-
-                    // Validate required columns
-                    if (rows.length === 0) {
-                        showNotification('❌ Excel file is empty!', 'error');
-                        uploadProgress.style.display = 'none';
-                        return;
-                    }
-
-                    const firstRow = rows[0];
-                    const hasTitle = firstRow.Title || firstRow.title || firstRow['Book Title'] || firstRow['Book Title'];
-                    if (!hasTitle) {
-                        showNotification('❌ Excel file must have "Title" column!', 'error');
-                        uploadProgress.style.display = 'none';
-                        return;
-                    }
-
-                    // Clear existing books if replace mode
-                    if (importMode === 'replace') {
-                        try {
-                            showNotification('Clearing existing books...', 'info');
-                            const batch = db.batch();
-                            const booksSnapshot = await db.collection("books").get();
-                            booksSnapshot.forEach(doc => {
-                                batch.delete(doc.ref);
-                            });
-                            await batch.commit();
-                            books = [];
-                        } catch (error) {
-                            console.error('Error clearing books:', error);
-                        }
-                    }
-
-                    for (let i = 0; i < rows.length; i++) {
-                        const row = rows[i];
-                        const progress = Math.round((i / rows.length) * 100);
-                        uploadProgressBar.style.width = `${progress}%`;
-                        uploadProgressBar.textContent = `${progress}%`;
-
-                        // Extract data with multiple possible column names
-                        const title = String(
-                            row.Title || 
-                            row.title || 
-                            row['Book Title'] || 
-                            row['Book Title'] || 
-                            ''
-                        ).trim();
-                        
-                        const author = String(
-                            row.Author || 
-                            row.author || 
-                            row['Author Name'] || 
-                            row['Author'] || 
-                            'Unknown'
-                        ).trim();
-                        
-                        if (!title) {
-                            errors++;
-                            continue;
-                        }
-
-                        let status = String(
-                            row.Status || 
-                            row.status || 
-                            row.Availability || 
-                            row.availability ||
-                            "available"
-                        ).toLowerCase().trim();
-                        
-                        if (!['available', 'unavailable'].includes(status)) {
-                            status = 'available';
-                        }
-                        
-                        const isbn = String(
-                            row.ISBN || 
-                            row.isbn || 
-                            row['ISBN Number'] || 
-                            row['ISBN'] ||
-                            ""
-                        ).trim();
-                        
-                        let year = row.Year || row.year || row.Year || new Date().getFullYear();
-                        if (typeof year === 'string') {
-                            year = parseInt(year) || new Date().getFullYear();
-                        }
-
-                        const bookData = {
-                            title: title,
-                            author: author,
-                            status: status,
-                            isbn: isbn,
-                            year: year,
-                            addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                            addedBy: auth.currentUser.email,
-                            importedFromExcel: true,
-                            importDate: new Date().toISOString()
-                        };
-
-                        try {
-                            await db.collection("books").add(bookData);
-                            added++;
-                        } catch (error) {
-                            console.error(`Error adding book at row ${i}:`, error);
-                            errors++;
-                        }
-                    }
-
-                    uploadProgressBar.style.width = '100%';
-                    uploadProgressBar.textContent = '100%';
-
-                    setTimeout(async () => {
-                        await loadBooksFromFirebase();
-                        loadAdminBooksList();
-                        updateDeleteCounts();
-                        uploadProgress.style.display = 'none';
-
-                        showNotification(`✅ Excel Import Complete!\n\n` +
-                              `• Total rows: ${rows.length}\n` +
-                              `• Successfully added: ${added} books\n` +
-                              `• Failed: ${errors} rows\n` +
-                              `• Total books now: ${books.length}`, 'success');
-                    }, 1000);
-
-                } catch (error) {
-                    console.error('Excel import error:', error);
-                    uploadProgress.style.display = 'none';
-                    showNotification(`❌ Error importing Excel file:\n${error.message}`, 'error');
-                }
-            };
-
-            reader.onerror = function() {
-                uploadProgress.style.display = 'none';
-                showNotification('❌ Error reading the Excel file', 'error');
-            };
-
-            reader.readAsArrayBuffer(file);
-            e.target.value = '';
-        });
-
-        // Download sample Excel template
-        document.getElementById('downloadSampleBtn').addEventListener('click', function() {
-            try {
-                const sampleData = [
-                    {
-                        "Title": "Digital Signal Processing",
-                        "Author": "John G. Proakis",
-                        "Status": "available",
-                        "ISBN": "9780131873742",
-                        "Year": 2007
-                    },
-                    {
-                        "Title": "Communication Systems",
-                        "Author": "Simon Haykin",
-                        "Status": "available", 
-                        "ISBN": "9780471697909",
-                        "Year": 2009
-                    },
-                    {
-                        "Title": "Electronic Devices and Circuit Theory",
-                        "Author": "Robert L. Boylestad",
-                        "Status": "unavailable",
-                        "ISBN": "9780132622264",
-                        "Year": 2012
-                    }
-                ];
-                
-                const ws = XLSX.utils.json_to_sheet(sampleData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Books");
-                
-                const wscols = [
-                    { wch: 40 },
-                    { wch: 30 },
-                    { wch: 15 },
-                    { wch: 20 },
-                    { wch: 10 }
-                ];
-                ws['!cols'] = wscols;
-                
-                XLSX.writeFile(wb, "ECE_Library_Excel_Template.xlsx");
-                showNotification('✅ Sample Excel template downloaded!', 'success');
-            } catch (error) {
-                console.error('Error downloading sample:', error);
-                showNotification('❌ Error downloading sample template', 'error');
-            }
-        });
-
-        // ============================================
-        // SEPARATE DELETE FUNCTIONS
-        // ============================================
-
-        // 1. DELETE BOOKS ONLY
-        async function deleteBooksOnly() {
-            if (books.length === 0) {
-                showNotification('No books to delete!', 'warning');
-                return;
-            }
-            
-            const confirmation = prompt(`⚠️ DELETE ALL ${books.length} BOOKS?\n\nType "DELETE ${books.length} BOOKS" to confirm`);
-            
-            if (confirmation === `DELETE ${books.length} BOOKS`) {
-                try {
-                    showNotification(`Deleting ${books.length} books...`, 'info');
-                    
-                    const batch = db.batch();
-                    const booksSnapshot = await db.collection("books").get();
-                    booksSnapshot.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
-                    await batch.commit();
-                    
-                    await loadBooksFromFirebase();
-                    loadAdminBooksList();
-                    updateDeleteCounts();
-                    
-                    showNotification(`✅ Successfully deleted ${books.length} books!`, 'success');
-                } catch (error) {
-                    console.error('Error deleting books:', error);
-                    showNotification('❌ Failed to delete books', 'error');
-                }
-            } else {
-                showNotification('Book deletion cancelled', 'info');
-            }
-        }
-
-        // 2. DELETE JOURNALS ONLY
-        async function deleteJournalsOnly() {
-            if (journals.length === 0) {
-                showNotification('No journals to delete!', 'warning');
-                return;
-            }
-            
-            const confirmation = prompt(`⚠️ DELETE ALL ${journals.length} JOURNAL LINKS?\n\nType "DELETE ${journals.length} JOURNALS" to confirm`);
-            
-            if (confirmation === `DELETE ${journals.length} JOURNALS`) {
-                try {
-                    showNotification(`Deleting ${journals.length} journals...`, 'info');
-                    
-                    const batch = db.batch();
-                    const journalsSnapshot = await db.collection("journals").get();
-                    journalsSnapshot.forEach(doc => {
-                        batch.delete(doc.ref);
-                    });
-                    await batch.commit();
-                    
-                    await loadJournalsFromFirebase();
-                    loadAdminJournalsList();
-                    updateDeleteCounts();
-                    
-                    showNotification(`✅ Successfully deleted ${journals.length} journal links!`, 'success');
-                } catch (error) {
-                    console.error('Error deleting journals:', error);
-                    showNotification('❌ Failed to delete journals', 'error');
-                }
-            } else {
-                showNotification('Journal deletion cancelled', 'info');
-            }
-        }
-
-        // 3. DELETE PROJECTS BY BATCH (with checkbox selection)
-        async function deleteProjectsByBatch() {
-            const modal = document.getElementById('deleteProjectsModal');
-            const batchGrid = document.getElementById('batchSelectionGrid');
-            
-            // Get all batches including custom ones
-            const allBatches = Object.keys(projects).sort((a, b) => b - a);
-            
-            if (allBatches.length === 0) {
-                showNotification('No projects to delete!', 'warning');
-                return;
-            }
-            
-            batchGrid.innerHTML = '';
-            allBatches.forEach(batch => {
-                const projectCount = projects[batch] ? projects[batch].length : 0;
-                if (projectCount > 0) {
-                    const checkboxDiv = document.createElement('div');
-                    checkboxDiv.className = 'batch-checkbox';
-                    checkboxDiv.innerHTML = `
-                        <input type="checkbox" id="batch-${batch}" value="${batch}" data-count="${projectCount}">
-                        <label for="batch-${batch}">${batch} (${projectCount})</label>
-                    `;
-                    batchGrid.appendChild(checkboxDiv);
-                }
-            });
-            
-            // Add event listeners
-            document.getElementById('selectAllBatches').addEventListener('change', function() {
-                const checkboxes = batchGrid.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(cb => cb.checked = this.checked);
-                updateSelectedBatchesInfo();
-            });
-            
-            batchGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                cb.addEventListener('change', updateSelectedBatchesInfo);
-            });
-            
-            updateSelectedBatchesInfo();
-            modal.style.display = 'flex';
-        }
-
-        // Update batch selection info
-        function updateSelectedBatchesInfo() {
-            const checkboxes = document.querySelectorAll('#batchSelectionGrid input[type="checkbox"]:checked');
-            const selectedBatches = Array.from(checkboxes).map(cb => cb.value);
-            const totalProjects = Array.from(checkboxes).reduce((sum, cb) => sum + parseInt(cb.dataset.count), 0);
-            
-            document.getElementById('selectedBatchesInfo').textContent = 
-                `Selected: ${selectedBatches.length} batches`;
-            document.getElementById('projectsCountInfo').textContent = 
-                `${totalProjects} projects will be deleted`;
-        }
-
-        // 4. CLEAR ALL DATA (EVERYTHING)
-        async function clearAllData() {
-            const totalBooks = books.length;
-            const totalJournals = journals.length;
-            const totalProjects = Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
-            const totalItems = totalBooks + totalJournals + totalProjects;
-            
-            if (totalItems === 0) {
-                showNotification('No data to clear!', 'warning');
-                return;
-            }
-            
-            const confirmation = prompt(`⚠️ NUKE EVERYTHING?\n\n` +
-                   `This will delete:\n` +
-                   `• ${totalBooks} books\n` +
-                   `• ${totalJournals} journals\n` +
-                   `• ${totalProjects} projects\n` +
-                   `• Scrolling message\n\n` +
-                   `Type "NUKE ${totalItems} ITEMS" to confirm`);
-            
-            if (confirmation === `NUKE ${totalItems} ITEMS`) {
-                try {
-                    showNotification('Deleting ALL data...', 'info');
-                    
-                    // Delete all books
-                    if (totalBooks > 0) {
-                        const booksBatch = db.batch();
-                        const booksSnapshot = await db.collection("books").get();
-                        booksSnapshot.forEach(doc => {
-                            booksBatch.delete(doc.ref);
-                        });
-                        await booksBatch.commit();
-                    }
-                    
-                    // Delete all journals
-                    if (totalJournals > 0) {
-                        const journalsBatch = db.batch();
-                        const journalsSnapshot = await db.collection("journals").get();
-                        journalsSnapshot.forEach(doc => {
-                            journalsBatch.delete(doc.ref);
-                        });
-                        await journalsBatch.commit();
-                    }
-                    
-                    // Delete all projects
-                    if (totalProjects > 0) {
-                        const projectsBatch = db.batch();
-                        const projectsSnapshot = await db.collection("projects").get();
-                        projectsSnapshot.forEach(doc => {
-                            projectsBatch.delete(doc.ref);
-                        });
-                        await projectsBatch.commit();
-                    }
-                    
-                    // Clear custom batches
-                    customBatches = [];
-                    saveCustomBatches();
-                    renderCustomBatches();
-                    
-                    // Clear scrolling message
-                    await db.collection("settings").doc("scrolling_message").set({
-                        message: "📚 DEPARTMENT OF ELECTRONICS AND COMMUNICATION ENGINEERING DIGITAL LIBRARY",
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedBy: auth.currentUser.email
-                    });
-                    
-                    await loadDashboardData();
-                    showNotification('✅ All data has been cleared successfully!', 'success');
-                } catch (error) {
-                    console.error('Error clearing data:', error);
-                    showNotification('❌ Error clearing data', 'error');
-                }
-            } else {
-                showNotification('Data clearance cancelled', 'info');
-            }
-        }
-
-        // ============================================
-        // MOBILE MENU FUNCTIONALITY
-        // ============================================
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const mobileAdminMenu = document.getElementById('mobileAdminMenu');
-            
-            if (mobileMenuBtn && mobileAdminMenu) {
-                mobileMenuBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    mobileAdminMenu.classList.toggle('show');
-                });
-                
-                // Close menu when clicking outside
-                document.addEventListener('click', function(e) {
-                    if (!mobileMenuBtn.contains(e.target) && !mobileAdminMenu.contains(e.target)) {
-                        mobileAdminMenu.classList.remove('show');
-                    }
-                });
-                
-                // Close menu when clicking menu items
-                mobileAdminMenu.querySelectorAll('.mobile-menu-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        mobileAdminMenu.classList.remove('show');
-                    });
-                });
-            }
-            
-            // Load custom batches
-            loadCustomBatches();
-            
-            // Show/hide custom batch input
-            document.getElementById('projectBatch').addEventListener('change', function() {
-                const customBatchSection = document.getElementById('customBatchSection');
-                if (this.value === 'custom') {
-                    customBatchSection.style.display = 'flex';
-                    document.getElementById('customBatchInput').focus();
-                } else {
-                    customBatchSection.style.display = 'none';
-                }
-            });
-            
-            // Add custom batch button
-            document.getElementById('addCustomBatchBtn').addEventListener('click', addCustomBatch);
-            
-            // Enter key to add custom batch
-            document.getElementById('customBatchInput').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    addCustomBatch();
-                }
-            });
-            
-            // Fix viewport height for mobile
-            function setVH() {
-                let vh = window.innerHeight * 0.01;
-                document.documentElement.style.setProperty('--vh', `${vh}px`);
-            }
-            
-            setVH();
-            window.addEventListener('resize', setVH);
-            window.addEventListener('orientationchange', setVH);
-        });
-
-        // ============================================
-        // DOM ELEMENTS & EVENT LISTENERS
-        // ============================================
-
-        const logoutBtn = document.getElementById('logoutBtn');
-        const syncDataBtn = document.getElementById('syncDataBtn');
-        const deleteBooksBtn = document.getElementById('deleteBooksBtn');
-        const deleteJournalsBtn = document.getElementById('deleteJournalsBtn');
-        const deleteProjectsByBatchBtn = document.getElementById('deleteProjectsByBatchBtn');
-        const clearAllDataBtn = document.getElementById('clearAllDataBtn');
-        const confirmDeleteProjects = document.getElementById('confirmDeleteProjects');
-        const closeProjectsModal = document.getElementById('closeProjectsModal');
-        const deleteProjectsModal = document.getElementById('deleteProjectsModal');
-
-        // Logout
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await auth.signOut();
-                localStorage.clear();
-                window.location.href = 'adminlogin.html';
-            } catch (error) {
-                console.error('Logout error:', error);
-            }
-        });
-
-        // Sync data
-        syncDataBtn.addEventListener('click', loadDashboardData);
-
-        // Delete books only
-        deleteBooksBtn.addEventListener('click', deleteBooksOnly);
-
-        // Delete journals only
-        deleteJournalsBtn.addEventListener('click', deleteJournalsOnly);
-
-        // Delete projects by batch
-        deleteProjectsByBatchBtn.addEventListener('click', deleteProjectsByBatch);
-
-        // Clear all data
-        clearAllDataBtn.addEventListener('click', clearAllData);
-
-        // Confirm delete selected projects
-        confirmDeleteProjects.addEventListener('click', async () => {
-            const checkboxes = document.querySelectorAll('#batchSelectionGrid input[type="checkbox"]:checked');
-            const selectedBatches = Array.from(checkboxes).map(cb => cb.value);
-            
-            if (selectedBatches.length === 0) {
-                showNotification('Please select at least one batch!', 'warning');
-                return;
-            }
-            
-            let totalProjects = 0;
-            selectedBatches.forEach(batch => {
-                totalProjects += projects[batch] ? projects[batch].length : 0;
-            });
-            
-            const confirmation = prompt(`⚠️ DELETE ${totalProjects} PROJECTS FROM ${selectedBatches.length} BATCHES?\n\n` +
-                   `Selected batches: ${selectedBatches.join(', ')}\n\n` +
-                   `Type "DELETE ${totalProjects} PROJECTS" to confirm`);
-            
-            if (confirmation === `DELETE ${totalProjects} PROJECTS`) {
-                try {
-                    showNotification(`Deleting projects from ${selectedBatches.length} batches...`, 'info');
-                    
-                    // Get all projects from selected batches
-                    let projectsToDelete = [];
-                    selectedBatches.forEach(batch => {
-                        if (projects[batch]) {
-                            projects[batch].forEach(project => {
-                                projectsToDelete.push({ id: project.id, batch: batch });
-                            });
-                        }
-                    });
-                    
-                    // Delete in batches of 500 (Firestore limit)
-                    const batchSize = 500;
-                    for (let i = 0; i < projectsToDelete.length; i += batchSize) {
-                        const batch = db.batch();
-                        const chunk = projectsToDelete.slice(i, i + batchSize);
-                        
-                        chunk.forEach(project => {
-                            const docRef = db.collection("projects").doc(project.id);
-                            batch.delete(docRef);
-                        });
-                        
-                        await batch.commit();
-                    }
-                    
-                    deleteProjectsModal.style.display = 'none';
-                    await loadProjectsFromFirebase();
-                    loadAdminProjectsList();
-                    updateDeleteCounts();
-                    
-                    showNotification(`✅ Successfully deleted ${totalProjects} projects from ${selectedBatches.length} batches!`, 'success');
-                } catch (error) {
-                    console.error('Error deleting projects:', error);
-                    showNotification('❌ Failed to delete projects', 'error');
-                }
-            } else {
-                showNotification('Project deletion cancelled', 'info');
-            }
-        });
-
-        // Close projects modal
-        closeProjectsModal.addEventListener('click', () => {
-            deleteProjectsModal.style.display = 'none';
-        });
-
-        window.addEventListener('click', (e) => {
-            if (e.target === deleteProjectsModal) {
-                deleteProjectsModal.style.display = 'none';
-            }
-            if (e.target === editBookModal) {
-                editBookModal.style.display = 'none';
-            }
-        });
-
-        // ============================================
-        // BOOK MANAGEMENT EVENT LISTENERS
-        // ============================================
-
-        const addBookBtn = document.getElementById('addBookBtn');
-        const updateBookBtn = document.getElementById('updateBookBtn');
-        const addJournalLinkBtn = document.getElementById('addJournalLinkBtn');
-        const exportBooksBtn = document.getElementById('exportBooksBtn');
-        const editBookModal = document.getElementById('editBookModal');
-        const closeEditModal = document.getElementById('closeEditModal');
-        const saveBookChanges = document.getElementById('saveBookChanges');
-        const adminBookSearch = document.getElementById('adminBookSearch');
-        const adminBookSearchBtn = document.getElementById('adminBookSearchBtn');
-        const updateMessageBtn = document.getElementById('updateMessageBtn');
-
-        // Add book (simple prompt version)
-        addBookBtn.addEventListener('click', () => {
-            const title = prompt("Enter book title:");
-            const author = prompt("Enter author name:");
-           
-            if (title && author) {
-                const newBook = {
-                    title: title,
-                    author: author,
-                    status: 'available',
-                    isbn: '',
-                    year: new Date().getFullYear()
-                };
-                
-                addBookToFirebase(newBook).then(() => {
-                    loadBooksFromFirebase().then(() => {
-                        loadAdminBooksList();
-                        updateDeleteCounts();
-                    });
-                });
-            }
-        });
-
-        // Update book from form
-        updateBookBtn.addEventListener('click', async () => {
-            const title = document.getElementById('bookTitle').value;
-            const author = document.getElementById('bookAuthor').value;
-            const status = document.getElementById('bookStatus').value;
-            const isbn = document.getElementById('bookIsbn').value;
-            const year = document.getElementById('bookYear').value;
-           
-            if (!title || !author) {
-                showNotification('Please enter book title and author!', 'warning');
-                return;
-            }
-            
-            const bookData = {
-                title: title.trim(),
-                author: author.trim(),
-                status: status,
-                isbn: isbn.trim(),
-                year: year ? parseInt(year) : new Date().getFullYear()
-            };
-            
-            try {
-                await addBookToFirebase(bookData);
-                await loadBooksFromFirebase();
-                loadAdminBooksList();
-                updateDeleteCounts();
-                
-                // Clear form
-                document.getElementById('bookTitle').value = '';
-                document.getElementById('bookAuthor').value = '';
-                document.getElementById('bookIsbn').value = '';
-                document.getElementById('bookYear').value = '';
-            } catch (error) {
-                console.error('Error adding book:', error);
-            }
-        });
-
-        // Edit book modal
-        closeEditModal.addEventListener('click', () => {
-            editBookModal.style.display = 'none';
-        });
-
-        saveBookChanges.addEventListener('click', async () => {
-            const title = document.getElementById('editBookTitle').value;
-            const author = document.getElementById('editBookAuthor').value;
-            const status = document.getElementById('editBookStatus').value;
-            const isbn = document.getElementById('editBookIsbn').value;
-            const year = document.getElementById('editBookYear').value;
-            const bookId = document.getElementById('editBookId').value;
-           
-            if (title && author && bookId) {
-                const bookData = {
-                    title: title,
-                    author: author,
-                    status: status,
-                    isbn: isbn,
-                    year: year ? parseInt(year) : undefined
-                };
-                
-                try {
-                    await updateBookInFirebase(bookId, bookData);
-                    await loadBooksFromFirebase();
-                    loadAdminBooksList();
-                    editBookModal.style.display = 'none';
-                } catch (error) {
-                    console.error('Error updating book:', error);
-                }
-            }
-        });
-
-        // Add journal link
-        addJournalLinkBtn.addEventListener('click', async () => {
-            const name = document.getElementById('journalName').value;
-            const url = document.getElementById('journalUrl').value;
-           
-            if (name && url) {
-                try {
-                    const journalData = {
-                        name: name,
-                        url: url,
-                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        addedBy: auth.currentUser.email
-                    };
-                    
-                    await db.collection("journals").add(journalData);
-                    await loadJournalsFromFirebase();
-                    loadAdminJournalsList();
-                    updateDeleteCounts();
-                    
-                    document.getElementById('journalName').value = '';
-                    document.getElementById('journalUrl').value = '';
-                } catch (error) {
-                    console.error('Error adding journal:', error);
-                }
-            }
-        });
-
-        // Export books to Excel
-        exportBooksBtn.addEventListener('click', () => {
-            if (books.length === 0) {
-                showNotification('No books to export!', 'warning');
-                return;
-            }
-            
-            try {
-                const exportData = books.map(book => ({
-                    'Title': book.title,
-                    'Author': book.author,
-                    'Status': book.status,
-                    'ISBN': book.isbn || '',
-                    'Year': book.year || ''
-                }));
-                
-                const ws = XLSX.utils.json_to_sheet(exportData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Books");
-                
-                const date = new Date();
-                const filename = `ECE_Library_Books_${date.getFullYear()}${(date.getMonth()+1).toString().padStart(2,'0')}${date.getDate().toString().padStart(2,'0')}.xlsx`;
-                
-                XLSX.writeFile(wb, filename);
-                showNotification(`✅ Exported ${books.length} books to Excel`, 'success');
-            } catch (error) {
-                console.error('Export error:', error);
-                showNotification('❌ Error exporting books', 'error');
-            }
-        });
-
-        // Update scrolling message
-        updateMessageBtn.addEventListener('click', async () => {
-            const newMessage = document.getElementById('newMessage').value;
-            if (newMessage) {
-                try {
-                    await db.collection("settings").doc("scrolling_message").set({
-                        message: newMessage,
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedBy: auth.currentUser.email
-                    });
-                    showNotification('Scrolling message updated successfully!', 'success');
-                } catch (error) {
-                    console.error('Error updating message:', error);
-                    showNotification('Failed to update message', 'error');
-                }
-            }
-        });
-
-        // ============================================
         // SEARCH FUNCTIONALITY
         // ============================================
 
@@ -2642,7 +3356,7 @@
             if (adminSearchQuery) {
                 filteredBooks = books.filter(book => 
                     book.title.toLowerCase().includes(adminSearchQuery) ||
-                    book.author.toLowerCase().includes(adminSearchQuery) ||
+                    (book.author && book.author.toLowerCase().includes(adminSearchQuery)) ||
                     (book.isbn && book.isbn.toLowerCase().includes(adminSearchQuery))
                 );
             }
@@ -2653,6 +3367,7 @@
                     : 'No books in database';
                 adminBooksList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${message}</p>`;
                 document.getElementById('adminBooksPagination').innerHTML = '';
+                document.getElementById('currentBookCount').textContent = '0';
                 return;
             }
            
@@ -2660,6 +3375,8 @@
             const startIndex = (page - 1) * adminBooksPerPage;
             const endIndex = Math.min(startIndex + adminBooksPerPage, filteredBooks.length);
             const pageBooks = filteredBooks.slice(startIndex, endIndex);
+           
+            document.getElementById('currentBookCount').textContent = pageBooks.length;
            
             pageBooks.forEach(book => {
                 const bookItem = document.createElement('div');
@@ -2678,6 +3395,7 @@
                     <p style="font-size: 0.9rem; margin-bottom: 5px;"><strong>Status:</strong> <span class="book-status ${book.status}">${book.status}</span></p>
                     ${book.isbn ? `<p style="font-size: 0.85rem; margin-bottom: 3px;"><strong>ISBN:</strong> ${book.isbn}</p>` : ''}
                     ${book.year ? `<p style="font-size: 0.85rem;"><strong>Year:</strong> ${book.year}</p>` : ''}
+                    ${book.addedDate ? `<p style="font-size: 0.75rem; color: #888; margin-top: 8px;"><i class="fas fa-calendar"></i> Added: ${book.addedDate.toLocaleDateString()}</p>` : ''}
                 `;
                 adminBooksList.appendChild(bookItem);
             });
@@ -2755,40 +3473,6 @@
             });
         }
 
-        function loadAdminJournalsList() {
-            const adminJournalsList = document.getElementById('adminJournalsList');
-            adminJournalsList.innerHTML = '';
-           
-            if (journals.length === 0) {
-                adminJournalsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No journal links available</p>';
-                return;
-            }
-           
-            journals.forEach(journal => {
-                const journalItem = document.createElement('div');
-                journalItem.style.padding = '12px';
-                journalItem.style.borderBottom = '1px solid #eee';
-                journalItem.style.display = 'flex';
-                journalItem.style.justifyContent = 'space-between';
-                journalItem.style.alignItems = 'center';
-                
-                journalItem.innerHTML = `
-                    <div style="flex: 1; min-width: 0;">
-                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">${journal.name}</strong>
-                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
-                            ${journal.url}
-                        </div>
-                    </div>
-                    <div style="margin-left: 10px;">
-                        <button class="action-btn delete-btn" onclick="deleteSingleJournal('${journal.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                adminJournalsList.appendChild(journalItem);
-            });
-        }
-
         // ============================================
         // SINGLE ITEM DELETE FUNCTIONS
         // ============================================
@@ -2800,6 +3484,7 @@
                     await loadBooksFromFirebase();
                     loadAdminBooksList();
                     updateDeleteCounts();
+                    updateStats();
                 } catch (error) {
                     console.error('Error deleting book:', error);
                 }
@@ -2813,25 +3498,11 @@
                     await loadProjectsFromFirebase();
                     loadAdminProjectsList();
                     updateDeleteCounts();
+                    updateStats();
                     showNotification('Project deleted successfully!', 'success');
                 } catch (error) {
                     console.error('Error deleting project:', error);
                     showNotification('Failed to delete project', 'error');
-                }
-            }
-        }
-
-        async function deleteSingleJournal(journalId) {
-            if (confirm('Are you sure you want to delete this journal link?')) {
-                try {
-                    await db.collection("journals").doc(journalId).delete();
-                    await loadJournalsFromFirebase();
-                    loadAdminJournalsList();
-                    updateDeleteCounts();
-                    showNotification('Journal deleted successfully!', 'success');
-                } catch (error) {
-                    console.error('Error deleting journal:', error);
-                    showNotification('Failed to delete journal', 'error');
                 }
             }
         }
@@ -2888,7 +3559,7 @@
         });
 
         // ============================================
-        // PDF UPLOAD HANDLER WITH CUSTOM BATCH SUPPORT
+        // PDF UPLOAD HANDLER
         // ============================================
 
         document.getElementById('pdfFile').addEventListener('change', async (e) => {
@@ -2917,13 +3588,11 @@
                 }
                 
                 try {
-                    // Upload PDF file
                     const storageRef = storage.ref();
                     const fileRef = storageRef.child(`projects/${batch}/${Date.now()}_${file.name}`);
                     await fileRef.put(file);
                     const fileUrl = await fileRef.getDownloadURL();
                     
-                    // Add project to Firestore
                     const projectData = {
                         title: title,
                         batch: batch,
@@ -2940,10 +3609,10 @@
                     await loadProjectsFromFirebase();
                     loadAdminProjectsList();
                     updateDeleteCounts();
+                    updateStats();
                     
-                    // Clear form
                     document.getElementById('projectTitle').value = '';
-                    batchSelect.value = '2026'; // Reset to default
+                    batchSelect.value = '2026';
                     document.getElementById('customBatchSection').style.display = 'none';
                     e.target.value = '';
                     
@@ -2988,12 +3657,11 @@
         // INITIAL LOAD
         // ============================================
 
-        // Load dashboard data
         loadDashboardData();
         
-        // Debug info
-        console.log('Admin dashboard loaded successfully');
-        console.log('XLSX library available:', typeof XLSX !== 'undefined');
+        console.log('Dual Journal Dashboard loaded successfully');
+        console.log('Supports 2000+ books import');
+        console.log('Two journal collections: journals_research and journals_conference');
     </script>
 </body>
 </html>
