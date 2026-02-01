@@ -1056,7 +1056,7 @@
                                 <span class="book-status ${book.status}">
                                     ${book.status === 'available' ? '✓ Available' : '✗ Checked Out'}
                                 </span>
-                            </div>
+                        </div>
                         `).join('') :
                         '<p style="text-align: center; color: #666;">No books found</p>'
                     }
@@ -1270,16 +1270,53 @@
 
         async function loadJournalsFromFirebase() {
             try {
-                const querySnapshot = await db.collection("journals")
-                    .orderBy("name")
-                    .get();
+                // Try to load from old collection first (for backward compatibility)
+                let oldJournals = [];
+                try {
+                    const oldSnapshot = await db.collection("journals")
+                        .orderBy("name")
+                        .get();
+                    
+                    oldJournals = [];
+                    oldSnapshot.forEach(doc => {
+                        oldJournals.push({ id: doc.id, ...doc.data(), type: 'research' });
+                    });
+                    console.log(`Loaded ${oldJournals.length} journals from old collection`);
+                } catch (oldError) {
+                    console.log("Old journals collection not found, using new collections");
+                }
                 
-                journals = [];
-                querySnapshot.forEach(doc => {
-                    journals.push({ id: doc.id, ...doc.data() });
-                });
+                // Load from new collections
+                let researchJournals = [];
+                let conferenceJournals = [];
                 
-                console.log(`Loaded ${journals.length} journals`);
+                try {
+                    const researchSnapshot = await db.collection("journals_research").get();
+                    researchSnapshot.forEach(doc => {
+                        researchJournals.push({ id: doc.id, ...doc.data(), type: 'research' });
+                    });
+                    console.log(`Loaded ${researchJournals.length} research journals`);
+                } catch (error) {
+                    console.log("Research journals collection not found");
+                }
+                
+                try {
+                    const conferenceSnapshot = await db.collection("journals_conference").get();
+                    conferenceSnapshot.forEach(doc => {
+                        conferenceJournals.push({ id: doc.id, ...doc.data(), type: 'conference' });
+                    });
+                    console.log(`Loaded ${conferenceJournals.length} conference journals`);
+                } catch (error) {
+                    console.log("Conference journals collection not found");
+                }
+                
+                // Combine all journals
+                journals = [...oldJournals, ...researchJournals, ...conferenceJournals];
+                
+                // Sort by name
+                journals.sort((a, b) => a.name.localeCompare(b.name));
+                
+                console.log(`Total journals loaded: ${journals.length}`);
             } catch (error) {
                 console.error("Error loading journals:", error);
                 throw error;
@@ -1514,4 +1551,3 @@
     </script>
 </body>
 </html>
-
