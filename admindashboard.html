@@ -942,72 +942,6 @@
             font-size: 1rem;
         }
 
-        /* Journal Categories */
-        .journal-category-select {
-            margin-bottom: 15px;
-        }
-
-        .category-tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
-        }
-
-        .category-tab {
-            padding: 8px 15px;
-            background: #f8f9fa;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-
-        .category-tab.active {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .category-tab:hover:not(.active) {
-            background: #e9ecef;
-        }
-
-        .journal-category-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 8px;
-        }
-
-        .badge-acm {
-            background: #0088cc;
-            color: white;
-        }
-
-        .badge-ieee {
-            background: #006699;
-            color: white;
-        }
-
-        .badge-springer {
-            background: #009688;
-            color: white;
-        }
-
-        .badge-elsevier {
-            background: #ff6f00;
-            color: white;
-        }
-
-        .badge-other {
-            background: #6c757d;
-            color: white;
-        }
-
         /* Responsive Improvements for Larger Screens */
         @media (min-width: 768px) {
             html {
@@ -1592,90 +1526,24 @@
                 </div>
             </div>
 
-            <!-- Journal Links Management - 1 -->
+            <!-- Journal Links Management -->
             <div class="card">
-                <h2><i class="fas fa-link"></i> Journal Links Management - Research Journals</h2>
-                
-                <!-- Category Tabs -->
-                <div class="category-tabs" id="journalCategoryTabs1">
-                    <button class="category-tab active" data-category="all">All</button>
-                    <button class="category-tab" data-category="acm">ACM</button>
-                    <button class="category-tab" data-category="ieee">IEEE</button>
-                    <button class="category-tab" data-category="springer">Springer</button>
-                    <button class="category-tab" data-category="elsevier">Elsevier</button>
-                    <button class="category-tab" data-category="other">Other</button>
-                </div>
-                
-                <!-- Add Journal Form -->
-                <div class="form-group">
-                    <label>Journal Category</label>
-                    <select id="journalCategory1" class="form-control">
-                        <option value="acm">ACM Digital Library</option>
-                        <option value="ieee">IEEE Xplore</option>
-                        <option value="springer">Springer Link</option>
-                        <option value="elsevier">Elsevier ScienceDirect</option>
-                        <option value="other">Other Journals</option>
-                    </select>
-                </div>
-                
+                <h2><i class="fas fa-link"></i> Journal Links Management</h2>
                 <div class="form-group">
                     <label>Journal Name</label>
-                    <input type="text" id="journalName1" class="form-control" placeholder="Enter journal name">
+                    <input type="text" id="journalName" class="form-control" placeholder="Enter journal name">
                 </div>
                 <div class="form-group">
                     <label>Journal URL</label>
-                    <input type="url" id="journalUrl1" class="form-control" placeholder="https://example.com/journal">
+                    <input type="url" id="journalUrl" class="form-control" placeholder="https://example.com/journal">
                 </div>
-                <button class="btn" id="addJournalLinkBtn1"><i class="fas fa-plus-circle"></i> Add Research Journal</button>
+                <button class="btn" id="addJournalLinkBtn"><i class="fas fa-plus-circle"></i> Add Journal Link</button>
                 
                 <!-- Journal List -->
                 <div style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Research Journals</h3>
-                    <div id="adminJournalsList1" style="max-height: 200px; overflow-y: auto;">
-                        <!-- Research journal list will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Journal Links Management - 2 -->
-            <div class="card">
-                <h2><i class="fas fa-link"></i> Journal Links Management - Conference Proceedings</h2>
-                
-                <!-- Category Tabs -->
-                <div class="category-tabs" id="journalCategoryTabs2">
-                    <button class="category-tab active" data-category="all">All</button>
-                    <button class="category-tab" data-category="conference">Conferences</button>
-                    <button class="category-tab" data-category="symposium">Symposiums</button>
-                    <button class="category-tab" data-category="workshop">Workshops</button>
-                    <button class="category-tab" data-category="proceedings">Proceedings</button>
-                </div>
-                
-                <!-- Add Journal Form -->
-                <div class="form-group">
-                    <label>Conference Type</label>
-                    <select id="journalCategory2" class="form-control">
-                        <option value="conference">International Conference</option>
-                        <option value="symposium">Symposium</option>
-                        <option value="workshop">Workshop</option>
-                        <option value="proceedings">Conference Proceedings</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Conference/Proceedings Name</label>
-                    <input type="text" id="journalName2" class="form-control" placeholder="Enter conference or proceedings name">
-                </div>
-                <div class="form-group">
-                    <label>Conference URL</label>
-                    <input type="url" id="journalUrl2" class="form-control" placeholder="https://example.com/conference">
-                </div>
-                <button class="btn" id="addJournalLinkBtn2"><i class="fas fa-plus-circle"></i> Add Conference Link</button>
-                
-                <!-- Journal List -->
-                <div style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Conference Proceedings</h3>
-                    <div id="adminJournalsList2" style="max-height: 200px; overflow-y: auto;">
-                        <!-- Conference journal list will be populated here -->
+                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Current Journals</h3>
+                    <div id="adminJournalsList" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Admin journal list will be populated here -->
                     </div>
                 </div>
             </div>
@@ -1795,19 +1663,17 @@
 
         let books = [];
         let projects = {};
-        let journals1 = []; // Research Journals
-        let journals2 = []; // Conference Proceedings
+        let journals = [];
         let adminCurrentPage = 1;
         let adminBooksPerPage = 10;
         let adminSearchQuery = '';
         let customBatches = [];
-        let activeCategory1 = 'all';
-        let activeCategory2 = 'all';
 
         // ============================================
         // ENHANCED FIREBASE FUNCTIONS FOR LARGE DATASETS
         // ============================================
 
+        // Load all books with pagination (supports 2000+ books)
         async function loadBooksFromFirebase() {
             try {
                 showNotification('Loading books...', 'info');
@@ -1815,7 +1681,7 @@
                 let allBooks = [];
                 let lastDoc = null;
                 let batchCount = 0;
-                const batchSize = 500;
+                const batchSize = 500; // Firestore max per query
                 
                 while (true) {
                     let query = db.collection("books")
@@ -1844,20 +1710,24 @@
                     
                     allBooks = [...allBooks, ...batchBooks];
                     
+                    // Update progress notification
                     showNotification(`Loaded ${allBooks.length} books... (Batch ${batchCount})`, 'info');
                     
+                    // Check if we got less than batch size (end of data)
                     if (querySnapshot.size < batchSize) {
                         break;
                     }
                     
                     lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
                     
+                    // Small delay to prevent overwhelming
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
                 
                 books = allBooks;
                 console.log(`Total books loaded: ${books.length}`);
                 
+                // Update stats
                 updateStats();
                 
                 return books;
@@ -1868,52 +1738,102 @@
             }
         }
 
-        // Load Research Journals
-        async function loadResearchJournalsFromFirebase() {
+        // Load books count only (faster)
+        async function getBooksCount() {
             try {
-                const querySnapshot = await db.collection("journals_research")
-                    .orderBy("name")
-                    .get();
-                
-                journals1 = [];
-                querySnapshot.forEach(doc => {
-                    journals1.push({ id: doc.id, ...doc.data() });
-                });
-                console.log(`Research journals loaded: ${journals1.length}`);
-                return journals1;
+                // Try to get count from metadata first
+                const booksRef = db.collection("books");
+                const snapshot = await booksRef.count().get();
+                return snapshot.data().count;
             } catch (error) {
-                console.error("Error loading research journals:", error);
+                console.error("Error getting count:", error);
+                // Fallback to loading all
+                await loadBooksFromFirebase();
+                return books.length;
+            }
+        }
+
+        // Enhanced batch import for large Excel files
+        async function importBooksBatch(bookDataArray, batchSize = 200) {
+            try {
+                const totalBooks = bookDataArray.length;
+                let successCount = 0;
+                let failedCount = 0;
+                
+                // Process in batches
+                for (let i = 0; i < totalBooks; i += batchSize) {
+                    const batch = bookDataArray.slice(i, i + batchSize);
+                    const batchNumber = Math.floor(i / batchSize) + 1;
+                    const totalBatches = Math.ceil(totalBooks / batchSize);
+                    
+                    // Update progress
+                    const progress = Math.round((i / totalBooks) * 100);
+                    document.getElementById('uploadProgressBar').style.width = `${progress}%`;
+                    document.getElementById('uploadProgressBar').textContent = `${progress}%`;
+                    
+                    // Update stats
+                    document.getElementById('processedCount').textContent = i + batch.length;
+                    document.getElementById('remainingCount').textContent = totalBooks - (i + batch.length);
+                    
+                    showNotification(`Processing batch ${batchNumber}/${totalBatches}...`, 'info');
+                    
+                    // Create batch write
+                    const batchWrite = db.batch();
+                    const booksCollection = db.collection("books");
+                    
+                    // Add each book to batch
+                    batch.forEach(bookData => {
+                        const docRef = booksCollection.doc(); // Auto-generated ID
+                        const bookWithMetadata = {
+                            ...bookData,
+                            addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            addedBy: auth.currentUser.email,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            importedFromExcel: true,
+                            importDate: new Date().toISOString()
+                        };
+                        batchWrite.set(docRef, bookWithMetadata);
+                    });
+                    
+                    // Commit batch
+                    try {
+                        await batchWrite.commit();
+                        successCount += batch.length;
+                        document.getElementById('successCount').textContent = successCount;
+                    } catch (batchError) {
+                        console.error(`Error in batch ${batchNumber}:`, batchError);
+                        failedCount += batch.length;
+                        document.getElementById('failedCount').textContent = failedCount;
+                        
+                        // Fallback to individual writes
+                        for (const bookData of batch) {
+                            try {
+                                await db.collection("books").add({
+                                    ...bookData,
+                                    addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                                    addedBy: auth.currentUser.email,
+                                    importedFromExcel: true
+                                });
+                                successCount++;
+                            } catch (individualError) {
+                                failedCount++;
+                                console.error("Individual book error:", individualError);
+                            }
+                        }
+                    }
+                    
+                    // Small delay to prevent rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                return { successCount, failedCount };
+            } catch (error) {
+                console.error("Batch import error:", error);
                 throw error;
             }
         }
 
-        // Load Conference Proceedings
-        async function loadConferenceJournalsFromFirebase() {
-            try {
-                const querySnapshot = await db.collection("journals_conference")
-                    .orderBy("name")
-                    .get();
-                
-                journals2 = [];
-                querySnapshot.forEach(doc => {
-                    journals2.push({ id: doc.id, ...doc.data() });
-                });
-                console.log(`Conference journals loaded: ${journals2.length}`);
-                return journals2;
-            } catch (error) {
-                console.error("Error loading conference journals:", error);
-                throw error;
-            }
-        }
-
-        // Load all journals (for backward compatibility)
-        async function loadAllJournalsFromFirebase() {
-            await Promise.all([
-                loadResearchJournalsFromFirebase(),
-                loadConferenceJournalsFromFirebase()
-            ]);
-        }
-
+        // Load projects
         async function loadProjectsFromFirebase() {
             try {
                 const querySnapshot = await db.collection("projects").get();
@@ -1925,6 +1845,7 @@
                     projects[batch].push({ id: doc.id, ...project });
                 });
                 
+                // Add custom batches from projects
                 querySnapshot.forEach(doc => {
                     const project = doc.data();
                     if (project.batch && !customBatches.includes(project.batch)) {
@@ -1945,6 +1866,24 @@
             }
         }
 
+        // Load journals
+        async function loadJournalsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("journals")
+                    .orderBy("name")
+                    .get();
+                
+                journals = [];
+                querySnapshot.forEach(doc => {
+                    journals.push({ id: doc.id, ...doc.data() });
+                });
+            } catch (error) {
+                console.error("Error loading journals:", error);
+                throw error;
+            }
+        }
+
+        // Load scrolling message
         async function loadScrollingMessage() {
             try {
                 const doc = await db.collection("settings").doc("scrolling_message").get();
@@ -1976,12 +1915,14 @@
             const customBatchList = document.getElementById('customBatchList');
             const projectBatchSelect = document.getElementById('projectBatch');
             
+            // Clear existing custom batches from select
             Array.from(projectBatchSelect.options).forEach(option => {
                 if (option.value === 'custom') {
                     // Keep only the "Add Custom Batch" option
                 }
             });
             
+            // Add custom batches to select dropdown
             customBatches.forEach(batch => {
                 const optionExists = Array.from(projectBatchSelect.options).some(
                     opt => opt.value === batch
@@ -1995,6 +1936,7 @@
                 }
             });
             
+            // Render batch tags
             customBatchList.innerHTML = '';
             customBatches.forEach(batch => {
                 if (batch !== 'custom') {
@@ -2063,22 +2005,24 @@
                 showNotification('Loading dashboard data...', 'info');
                 updateDbStatus(true);
                 
+                // Load all data in parallel
                 await Promise.all([
                     loadBooksFromFirebase(),
                     loadProjectsFromFirebase(),
-                    loadAllJournalsFromFirebase(),
+                    loadJournalsFromFirebase(),
                     loadScrollingMessage()
                 ]);
                 
+                // Update UI
                 loadAdminBooksList();
                 loadAdminProjectsList();
-                loadAdminJournalsList1();
-                loadAdminJournalsList2();
+                loadAdminJournalsList();
                 updateDeleteCounts();
                 updateStats();
                 
-                showNotification(`✅ Dashboard loaded! ${books.length} books, ${journals1.length + journals2.length} journals`, 'success');
+                showNotification(`✅ Dashboard loaded! ${books.length} books, ${journals.length} journals`, 'success');
                 
+                // Update last updated time
                 document.getElementById('statsLastUpdated').textContent = 
                     new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
@@ -2102,12 +2046,12 @@
 
         function updateDeleteCounts() {
             document.getElementById('booksCount').textContent = books.length;
-            document.getElementById('journalsCount').textContent = journals1.length + journals2.length;
+            document.getElementById('journalsCount').textContent = journals.length;
         }
 
         function updateStats() {
             document.getElementById('statsBooksCount').textContent = books.length;
-            document.getElementById('statsJournalsCount').textContent = journals1.length + journals2.length;
+            document.getElementById('statsJournalsCount').textContent = journals.length;
             document.getElementById('statsProjectsCount').textContent = 
                 Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
             
@@ -2133,6 +2077,7 @@
             uploadProgressBar.style.width = '0%';
             uploadProgressBar.textContent = '0%';
             
+            // Reset stats
             document.getElementById('processedCount').textContent = '0';
             document.getElementById('successCount').textContent = '0';
             document.getElementById('failedCount').textContent = '0';
@@ -2161,8 +2106,9 @@
 
                     showNotification(`Found ${rows.length} rows in Excel`, 'info');
 
+                    // Validate required columns
                     const firstRow = rows[0];
-                    const hasTitle = firstRow.Title || row.title || firstRow['Book Title'] || firstRow['Book Title'];
+                    const hasTitle = firstRow.Title || firstRow.title || firstRow['Book Title'] || firstRow['Book Title'];
                     if (!hasTitle) {
                         showNotification('❌ Excel file must have "Title" column!', 'error');
                         uploadProgress.style.display = 'none';
@@ -2170,12 +2116,14 @@
                         return;
                     }
 
+                    // Process data
                     const bookDataArray = [];
                     let validRows = 0;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
                         
+                        // Extract data
                         const title = String(
                             row.Title || 
                             row.title || 
@@ -2184,7 +2132,7 @@
                             ''
                         ).trim();
                         
-                        if (!title) continue;
+                        if (!title) continue; // Skip rows without title
                         
                         const author = String(
                             row.Author || 
@@ -2237,10 +2185,12 @@
                     showNotification(`Processing ${validRows} valid books...`, 'info');
                     document.getElementById('remainingCount').textContent = validRows;
 
+                    // Clear existing books if replace mode
                     if (importMode === 'replace' && books.length > 0) {
                         const confirmation = confirm(`Replace ${books.length} existing books with ${validRows} new books?`);
                         if (confirmation) {
                             showNotification('Clearing existing books...', 'info');
+                            // Delete in batches
                             const deleteBatchSize = 500;
                             for (let i = 0; i < books.length; i += deleteBatchSize) {
                                 const batch = db.batch();
@@ -2261,21 +2211,26 @@
                         }
                     }
 
+                    // Import books in batches
                     const result = await importBooksBatch(bookDataArray, batchSize);
                     
+                    // Final progress
                     uploadProgressBar.style.width = '100%';
                     uploadProgressBar.textContent = '100%';
                     
+                    // Reload books and update UI
                     await loadBooksFromFirebase();
                     loadAdminBooksList();
                     updateDeleteCounts();
                     updateStats();
                     
+                    // Hide progress bars
                     setTimeout(() => {
                         uploadProgress.style.display = 'none';
                         uploadStats.style.display = 'none';
                     }, 2000);
                     
+                    // Show final results
                     showNotification(`✅ Import Complete!\n\n` +
                           `• Total rows processed: ${rows.length}\n` +
                           `• Valid books: ${validRows}\n` +
@@ -2300,77 +2255,6 @@
             reader.readAsArrayBuffer(file);
             e.target.value = '';
         });
-
-        async function importBooksBatch(bookDataArray, batchSize = 200) {
-            try {
-                const totalBooks = bookDataArray.length;
-                let successCount = 0;
-                let failedCount = 0;
-                
-                for (let i = 0; i < totalBooks; i += batchSize) {
-                    const batch = bookDataArray.slice(i, i + batchSize);
-                    const batchNumber = Math.floor(i / batchSize) + 1;
-                    const totalBatches = Math.ceil(totalBooks / batchSize);
-                    
-                    const progress = Math.round((i / totalBooks) * 100);
-                    document.getElementById('uploadProgressBar').style.width = `${progress}%`;
-                    document.getElementById('uploadProgressBar').textContent = `${progress}%`;
-                    
-                    document.getElementById('processedCount').textContent = i + batch.length;
-                    document.getElementById('remainingCount').textContent = totalBooks - (i + batch.length);
-                    
-                    showNotification(`Processing batch ${batchNumber}/${totalBatches}...`, 'info');
-                    
-                    const batchWrite = db.batch();
-                    const booksCollection = db.collection("books");
-                    
-                    batch.forEach(bookData => {
-                        const docRef = booksCollection.doc();
-                        const bookWithMetadata = {
-                            ...bookData,
-                            addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                            addedBy: auth.currentUser.email,
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                            importedFromExcel: true,
-                            importDate: new Date().toISOString()
-                        };
-                        batchWrite.set(docRef, bookWithMetadata);
-                    });
-                    
-                    try {
-                        await batchWrite.commit();
-                        successCount += batch.length;
-                        document.getElementById('successCount').textContent = successCount;
-                    } catch (batchError) {
-                        console.error(`Error in batch ${batchNumber}:`, batchError);
-                        failedCount += batch.length;
-                        document.getElementById('failedCount').textContent = failedCount;
-                        
-                        for (const bookData of batch) {
-                            try {
-                                await db.collection("books").add({
-                                    ...bookData,
-                                    addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                                    addedBy: auth.currentUser.email,
-                                    importedFromExcel: true
-                                });
-                                successCount++;
-                            } catch (individualError) {
-                                failedCount++;
-                                console.error("Individual book error:", individualError);
-                            }
-                        }
-                    }
-                    
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-                
-                return { successCount, failedCount };
-            } catch (error) {
-                console.error("Batch import error:", error);
-                throw error;
-            }
-        }
 
         // Download sample Excel template
         document.getElementById('downloadSampleBtn').addEventListener('click', function() {
@@ -2436,6 +2320,7 @@
                 try {
                     showNotification(`Deleting ${books.length} books...`, 'info');
                     
+                    // Delete in batches to avoid timeout
                     const batchSize = 500;
                     for (let i = 0; i < books.length; i += batchSize) {
                         const batch = db.batch();
@@ -2446,6 +2331,7 @@
                         });
                         await batch.commit();
                         
+                        // Update progress
                         const progress = Math.round((Math.min(i + batchSize, books.length) / books.length) * 100);
                         showNotification(`Deleting... ${progress}% complete`, 'info');
                         await new Promise(resolve => setTimeout(resolve, 300));
@@ -2467,45 +2353,30 @@
         }
 
         async function deleteJournalsOnly() {
-            const totalJournals = journals1.length + journals2.length;
-            if (totalJournals === 0) {
+            if (journals.length === 0) {
                 showNotification('No journals to delete!', 'warning');
                 return;
             }
             
-            const confirmation = prompt(`⚠️ DELETE ALL ${totalJournals} JOURNAL LINKS?\n\nType "DELETE ${totalJournals} JOURNALS" to confirm`);
+            const confirmation = prompt(`⚠️ DELETE ALL ${journals.length} JOURNAL LINKS?\n\nType "DELETE ${journals.length} JOURNALS" to confirm`);
             
-            if (confirmation === `DELETE ${totalJournals} JOURNALS`) {
+            if (confirmation === `DELETE ${journals.length} JOURNALS`) {
                 try {
-                    showNotification(`Deleting ${totalJournals} journals...`, 'info');
+                    showNotification(`Deleting ${journals.length} journals...`, 'info');
                     
-                    // Delete research journals
-                    if (journals1.length > 0) {
-                        const batch1 = db.batch();
-                        journals1.forEach(journal => {
-                            const docRef = db.collection("journals_research").doc(journal.id);
-                            batch1.delete(docRef);
-                        });
-                        await batch1.commit();
-                    }
+                    const batch = db.batch();
+                    journals.forEach(journal => {
+                        const docRef = db.collection("journals").doc(journal.id);
+                        batch.delete(docRef);
+                    });
+                    await batch.commit();
                     
-                    // Delete conference journals
-                    if (journals2.length > 0) {
-                        const batch2 = db.batch();
-                        journals2.forEach(journal => {
-                            const docRef = db.collection("journals_conference").doc(journal.id);
-                            batch2.delete(docRef);
-                        });
-                        await batch2.commit();
-                    }
-                    
-                    await loadAllJournalsFromFirebase();
-                    loadAdminJournalsList1();
-                    loadAdminJournalsList2();
+                    await loadJournalsFromFirebase();
+                    loadAdminJournalsList();
                     updateDeleteCounts();
                     updateStats();
                     
-                    showNotification(`✅ Successfully deleted ${totalJournals} journal links!`, 'success');
+                    showNotification(`✅ Successfully deleted ${journals.length} journal links!`, 'success');
                 } catch (error) {
                     console.error('Error deleting journals:', error);
                     showNotification('❌ Failed to delete journals', 'error');
@@ -2567,7 +2438,7 @@
 
         async function clearAllData() {
             const totalBooks = books.length;
-            const totalJournals = journals1.length + journals2.length;
+            const totalJournals = journals.length;
             const totalProjects = Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
             const totalItems = totalBooks + totalJournals + totalProjects;
             
@@ -2588,6 +2459,7 @@
                 try {
                     showNotification('Deleting ALL data...', 'info');
                     
+                    // Delete all books in batches
                     if (totalBooks > 0) {
                         const deleteBatchSize = 500;
                         for (let i = 0; i < books.length; i += deleteBatchSize) {
@@ -2602,28 +2474,17 @@
                         }
                     }
                     
+                    // Delete all journals
                     if (totalJournals > 0) {
-                        // Delete research journals
-                        if (journals1.length > 0) {
-                            const batch1 = db.batch();
-                            journals1.forEach(journal => {
-                                const docRef = db.collection("journals_research").doc(journal.id);
-                                batch1.delete(docRef);
-                            });
-                            await batch1.commit();
-                        }
-                        
-                        // Delete conference journals
-                        if (journals2.length > 0) {
-                            const batch2 = db.batch();
-                            journals2.forEach(journal => {
-                                const docRef = db.collection("journals_conference").doc(journal.id);
-                                batch2.delete(docRef);
-                            });
-                            await batch2.commit();
-                        }
+                        const journalsBatch = db.batch();
+                        journals.forEach(journal => {
+                            const docRef = db.collection("journals").doc(journal.id);
+                            journalsBatch.delete(docRef);
+                        });
+                        await journalsBatch.commit();
                     }
                     
+                    // Delete all projects
                     if (totalProjects > 0) {
                         const projectsBatch = db.batch();
                         Object.values(projects).forEach(batchProjects => {
@@ -2635,10 +2496,12 @@
                         await projectsBatch.commit();
                     }
                     
+                    // Clear custom batches
                     customBatches = [];
                     saveCustomBatches();
                     renderCustomBatches();
                     
+                    // Clear scrolling message
                     await db.collection("settings").doc("scrolling_message").set({
                         message: "📚 DEPARTMENT OF ELECTRONICS AND COMMUNICATION ENGINEERING DIGITAL LIBRARY",
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2654,261 +2517,6 @@
             } else {
                 showNotification('Data clearance cancelled', 'info');
             }
-        }
-
-        // ============================================
-        // JOURNAL MANAGEMENT FUNCTIONS
-        // ============================================
-
-        // Add Research Journal
-        async function addResearchJournal() {
-            const category = document.getElementById('journalCategory1').value;
-            const name = document.getElementById('journalName1').value;
-            const url = document.getElementById('journalUrl1').value;
-           
-            if (name && url) {
-                try {
-                    const journalData = {
-                        name: name,
-                        url: url,
-                        category: category,
-                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        addedBy: auth.currentUser.email
-                    };
-                    
-                    await db.collection("journals_research").add(journalData);
-                    await loadResearchJournalsFromFirebase();
-                    loadAdminJournalsList1();
-                    updateDeleteCounts();
-                    updateStats();
-                    
-                    document.getElementById('journalName1').value = '';
-                    document.getElementById('journalUrl1').value = '';
-                    
-                    showNotification(`Research journal "${name}" added successfully!`, 'success');
-                } catch (error) {
-                    console.error('Error adding research journal:', error);
-                    showNotification('Failed to add research journal', 'error');
-                }
-            } else {
-                showNotification('Please enter journal name and URL!', 'warning');
-            }
-        }
-
-        // Add Conference Journal
-        async function addConferenceJournal() {
-            const category = document.getElementById('journalCategory2').value;
-            const name = document.getElementById('journalName2').value;
-            const url = document.getElementById('journalUrl2').value;
-           
-            if (name && url) {
-                try {
-                    const journalData = {
-                        name: name,
-                        url: url,
-                        category: category,
-                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        addedBy: auth.currentUser.email
-                    };
-                    
-                    await db.collection("journals_conference").add(journalData);
-                    await loadConferenceJournalsFromFirebase();
-                    loadAdminJournalsList2();
-                    updateDeleteCounts();
-                    updateStats();
-                    
-                    document.getElementById('journalName2').value = '';
-                    document.getElementById('journalUrl2').value = '';
-                    
-                    showNotification(`Conference proceedings "${name}" added successfully!`, 'success');
-                } catch (error) {
-                    console.error('Error adding conference journal:', error);
-                    showNotification('Failed to add conference journal', 'error');
-                }
-            } else {
-                showNotification('Please enter conference name and URL!', 'warning');
-            }
-        }
-
-        // Get category badge HTML
-        function getCategoryBadge(category) {
-            const badges = {
-                'acm': '<span class="journal-category-badge badge-acm">ACM</span>',
-                'ieee': '<span class="journal-category-badge badge-ieee">IEEE</span>',
-                'springer': '<span class="journal-category-badge badge-springer">Springer</span>',
-                'elsevier': '<span class="journal-category-badge badge-elsevier">Elsevier</span>',
-                'conference': '<span class="journal-category-badge badge-springer">Conference</span>',
-                'symposium': '<span class="journal-category-badge badge-elsevier">Symposium</span>',
-                'workshop': '<span class="journal-category-badge badge-acm">Workshop</span>',
-                'proceedings': '<span class="journal-category-badge badge-ieee">Proceedings</span>',
-                'other': '<span class="journal-category-badge badge-other">Other</span>'
-            };
-            return badges[category] || '<span class="journal-category-badge badge-other">Other</span>';
-        }
-
-        // Get category display name
-        function getCategoryName(category) {
-            const names = {
-                'acm': 'ACM Digital Library',
-                'ieee': 'IEEE Xplore',
-                'springer': 'Springer Link',
-                'elsevier': 'Elsevier ScienceDirect',
-                'conference': 'International Conference',
-                'symposium': 'Symposium',
-                'workshop': 'Workshop',
-                'proceedings': 'Conference Proceedings',
-                'other': 'Other Journals'
-            };
-            return names[category] || 'Other';
-        }
-
-        // Load Research Journals List
-        function loadAdminJournalsList1() {
-            const adminJournalsList = document.getElementById('adminJournalsList1');
-            adminJournalsList.innerHTML = '';
-           
-            let filteredJournals = journals1;
-            if (activeCategory1 !== 'all') {
-                filteredJournals = journals1.filter(journal => journal.category === activeCategory1);
-            }
-           
-            if (filteredJournals.length === 0) {
-                const message = activeCategory1 !== 'all' 
-                    ? `No ${getCategoryName(activeCategory1)} journals`
-                    : 'No research journals available';
-                adminJournalsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${message}</p>`;
-                return;
-            }
-           
-            filteredJournals.forEach(journal => {
-                const journalItem = document.createElement('div');
-                journalItem.style.padding = '12px';
-                journalItem.style.borderBottom = '1px solid #eee';
-                journalItem.style.display = 'flex';
-                journalItem.style.justifyContent = 'space-between';
-                journalItem.style.alignItems = 'center';
-                
-                journalItem.innerHTML = `
-                    <div style="flex: 1; min-width: 0;">
-                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">
-                            ${journal.name} ${getCategoryBadge(journal.category)}
-                        </strong>
-                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
-                            ${journal.url}
-                        </div>
-                    </div>
-                    <div style="margin-left: 10px;">
-                        <button class="action-btn delete-btn" onclick="deleteSingleResearchJournal('${journal.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                adminJournalsList.appendChild(journalItem);
-            });
-        }
-
-        // Load Conference Journals List
-        function loadAdminJournalsList2() {
-            const adminJournalsList = document.getElementById('adminJournalsList2');
-            adminJournalsList.innerHTML = '';
-           
-            let filteredJournals = journals2;
-            if (activeCategory2 !== 'all') {
-                filteredJournals = journals2.filter(journal => journal.category === activeCategory2);
-            }
-           
-            if (filteredJournals.length === 0) {
-                const message = activeCategory2 !== 'all' 
-                    ? `No ${getCategoryName(activeCategory2)} links`
-                    : 'No conference proceedings available';
-                adminJournalsList.innerHTML = `<p style="text-align: center; color: #666; padding: 20px;">${message}</p>`;
-                return;
-            }
-           
-            filteredJournals.forEach(journal => {
-                const journalItem = document.createElement('div');
-                journalItem.style.padding = '12px';
-                journalItem.style.borderBottom = '1px solid #eee';
-                journalItem.style.display = 'flex';
-                journalItem.style.justifyContent = 'space-between';
-                journalItem.style.alignItems = 'center';
-                
-                journalItem.innerHTML = `
-                    <div style="flex: 1; min-width: 0;">
-                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">
-                            ${journal.name} ${getCategoryBadge(journal.category)}
-                        </strong>
-                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
-                            ${journal.url}
-                        </div>
-                    </div>
-                    <div style="margin-left: 10px;">
-                        <button class="action-btn delete-btn" onclick="deleteSingleConferenceJournal('${journal.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                adminJournalsList.appendChild(journalItem);
-            });
-        }
-
-        // Delete Single Research Journal
-        async function deleteSingleResearchJournal(journalId) {
-            if (confirm('Are you sure you want to delete this research journal link?')) {
-                try {
-                    await db.collection("journals_research").doc(journalId).delete();
-                    await loadResearchJournalsFromFirebase();
-                    loadAdminJournalsList1();
-                    updateDeleteCounts();
-                    updateStats();
-                    showNotification('Research journal deleted successfully!', 'success');
-                } catch (error) {
-                    console.error('Error deleting research journal:', error);
-                    showNotification('Failed to delete research journal', 'error');
-                }
-            }
-        }
-
-        // Delete Single Conference Journal
-        async function deleteSingleConferenceJournal(journalId) {
-            if (confirm('Are you sure you want to delete this conference proceedings link?')) {
-                try {
-                    await db.collection("journals_conference").doc(journalId).delete();
-                    await loadConferenceJournalsFromFirebase();
-                    loadAdminJournalsList2();
-                    updateDeleteCounts();
-                    updateStats();
-                    showNotification('Conference proceedings deleted successfully!', 'success');
-                } catch (error) {
-                    console.error('Error deleting conference journal:', error);
-                    showNotification('Failed to delete conference journal', 'error');
-                }
-            }
-        }
-
-        // Initialize category tabs
-        function initCategoryTabs() {
-            // Research Journals Tabs
-            const tabs1 = document.querySelectorAll('#journalCategoryTabs1 .category-tab');
-            tabs1.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs1.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    activeCategory1 = this.getAttribute('data-category');
-                    loadAdminJournalsList1();
-                });
-            });
-
-            // Conference Proceedings Tabs
-            const tabs2 = document.querySelectorAll('#journalCategoryTabs2 .category-tab');
-            tabs2.forEach(tab => {
-                tab.addEventListener('click', function() {
-                    tabs2.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    activeCategory2 = this.getAttribute('data-category');
-                    loadAdminJournalsList2();
-                });
-            });
         }
 
         // ============================================
@@ -2939,7 +2547,6 @@
             }
             
             loadCustomBatches();
-            initCategoryTabs();
             
             document.getElementById('projectBatch').addEventListener('change', function() {
                 const customBatchSection = document.getElementById('customBatchSection');
@@ -3100,8 +2707,7 @@
 
         const addBookBtn = document.getElementById('addBookBtn');
         const updateBookBtn = document.getElementById('updateBookBtn');
-        const addJournalLinkBtn1 = document.getElementById('addJournalLinkBtn1');
-        const addJournalLinkBtn2 = document.getElementById('addJournalLinkBtn2');
+        const addJournalLinkBtn = document.getElementById('addJournalLinkBtn');
         const exportBooksBtn = document.getElementById('exportBooksBtn');
         const editBookModal = document.getElementById('editBookModal');
         const closeEditModal = document.getElementById('closeEditModal');
@@ -3206,11 +2812,33 @@
             }
         });
 
-        // Add research journal link
-        addJournalLinkBtn1.addEventListener('click', addResearchJournal);
-
-        // Add conference journal link
-        addJournalLinkBtn2.addEventListener('click', addConferenceJournal);
+        // Add journal link
+        addJournalLinkBtn.addEventListener('click', async () => {
+            const name = document.getElementById('journalName').value;
+            const url = document.getElementById('journalUrl').value;
+           
+            if (name && url) {
+                try {
+                    const journalData = {
+                        name: name,
+                        url: url,
+                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                        addedBy: auth.currentUser.email
+                    };
+                    
+                    await db.collection("journals").add(journalData);
+                    await loadJournalsFromFirebase();
+                    loadAdminJournalsList();
+                    updateDeleteCounts();
+                    updateStats();
+                    
+                    document.getElementById('journalName').value = '';
+                    document.getElementById('journalUrl').value = '';
+                } catch (error) {
+                    console.error('Error adding journal:', error);
+                }
+            }
+        });
 
         // Export books to Excel
         exportBooksBtn.addEventListener('click', () => {
@@ -3473,6 +3101,40 @@
             });
         }
 
+        function loadAdminJournalsList() {
+            const adminJournalsList = document.getElementById('adminJournalsList');
+            adminJournalsList.innerHTML = '';
+           
+            if (journals.length === 0) {
+                adminJournalsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No journal links available</p>';
+                return;
+            }
+           
+            journals.forEach(journal => {
+                const journalItem = document.createElement('div');
+                journalItem.style.padding = '12px';
+                journalItem.style.borderBottom = '1px solid #eee';
+                journalItem.style.display = 'flex';
+                journalItem.style.justifyContent = 'space-between';
+                journalItem.style.alignItems = 'center';
+                
+                journalItem.innerHTML = `
+                    <div style="flex: 1; min-width: 0;">
+                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">${journal.name}</strong>
+                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
+                            ${journal.url}
+                        </div>
+                    </div>
+                    <div style="margin-left: 10px;">
+                        <button class="action-btn delete-btn" onclick="deleteSingleJournal('${journal.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                adminJournalsList.appendChild(journalItem);
+            });
+        }
+
         // ============================================
         // SINGLE ITEM DELETE FUNCTIONS
         // ============================================
@@ -3503,6 +3165,22 @@
                 } catch (error) {
                     console.error('Error deleting project:', error);
                     showNotification('Failed to delete project', 'error');
+                }
+            }
+        }
+
+        async function deleteSingleJournal(journalId) {
+            if (confirm('Are you sure you want to delete this journal link?')) {
+                try {
+                    await db.collection("journals").doc(journalId).delete();
+                    await loadJournalsFromFirebase();
+                    loadAdminJournalsList();
+                    updateDeleteCounts();
+                    updateStats();
+                    showNotification('Journal deleted successfully!', 'success');
+                } catch (error) {
+                    console.error('Error deleting journal:', error);
+                    showNotification('Failed to delete journal', 'error');
                 }
             }
         }
@@ -3659,9 +3337,8 @@
 
         loadDashboardData();
         
-        console.log('Dual Journal Dashboard loaded successfully');
+        console.log('Enhanced Admin dashboard loaded successfully');
         console.log('Supports 2000+ books import');
-        console.log('Two journal collections: journals_research and journals_conference');
     </script>
 </body>
 </html>
