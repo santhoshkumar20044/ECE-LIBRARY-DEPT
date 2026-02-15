@@ -694,8 +694,10 @@
                 <!-- Library Information -->
                 <div class="card">
                     <h2><i class="fas fa-info-circle"></i> Library Information</h2>
-                    <p><strong>Timings:</strong> 9:00 AM - 5:00 PM (Mon-Sat)</p>
-                    <p><strong>Contact:</strong> hod.ece@shanmugha.edu.in </p>
+                    <p><strong>Timings:</strong> 9:00 AM - 8:00 PM (Mon-Sat)</p>
+                    <p><strong>Location:</strong> ECE Department, 2nd Floor</p>
+                    <p><strong>Contact:</strong> ecelibrary@department.edu</p>
+                    <p><strong>Librarian:</strong> Dr. R. Sharma</p>
                     <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
                         For admin access, contact the department head.
                     </p>
@@ -1056,7 +1058,7 @@
                                 <span class="book-status ${book.status}">
                                     ${book.status === 'available' ? '✓ Available' : '✗ Checked Out'}
                                 </span>
-                        </div>
+                            </div>
                         `).join('') :
                         '<p style="text-align: center; color: #666;">No books found</p>'
                     }
@@ -1270,53 +1272,16 @@
 
         async function loadJournalsFromFirebase() {
             try {
-                // Try to load from old collection first (for backward compatibility)
-                let oldJournals = [];
-                try {
-                    const oldSnapshot = await db.collection("journals")
-                        .orderBy("name")
-                        .get();
-                    
-                    oldJournals = [];
-                    oldSnapshot.forEach(doc => {
-                        oldJournals.push({ id: doc.id, ...doc.data(), type: 'research' });
-                    });
-                    console.log(`Loaded ${oldJournals.length} journals from old collection`);
-                } catch (oldError) {
-                    console.log("Old journals collection not found, using new collections");
-                }
+                const querySnapshot = await db.collection("journals")
+                    .orderBy("name")
+                    .get();
                 
-                // Load from new collections
-                let researchJournals = [];
-                let conferenceJournals = [];
+                journals = [];
+                querySnapshot.forEach(doc => {
+                    journals.push({ id: doc.id, ...doc.data() });
+                });
                 
-                try {
-                    const researchSnapshot = await db.collection("journals_research").get();
-                    researchSnapshot.forEach(doc => {
-                        researchJournals.push({ id: doc.id, ...doc.data(), type: 'research' });
-                    });
-                    console.log(`Loaded ${researchJournals.length} research journals`);
-                } catch (error) {
-                    console.log("Research journals collection not found");
-                }
-                
-                try {
-                    const conferenceSnapshot = await db.collection("journals_conference").get();
-                    conferenceSnapshot.forEach(doc => {
-                        conferenceJournals.push({ id: doc.id, ...doc.data(), type: 'conference' });
-                    });
-                    console.log(`Loaded ${conferenceJournals.length} conference journals`);
-                } catch (error) {
-                    console.log("Conference journals collection not found");
-                }
-                
-                // Combine all journals
-                journals = [...oldJournals, ...researchJournals, ...conferenceJournals];
-                
-                // Sort by name
-                journals.sort((a, b) => a.name.localeCompare(b.name));
-                
-                console.log(`Total journals loaded: ${journals.length}`);
+                console.log(`Loaded ${journals.length} journals`);
             } catch (error) {
                 console.error("Error loading journals:", error);
                 throw error;
