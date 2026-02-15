@@ -356,13 +356,13 @@
             color: var(--accent);
         }
 
-        /* Projects & Journals */
-        .project-list, .journal-list {
+        /* Projects & Journals & Exams */
+        .project-list, .journal-list, .exam-list {
             list-style: none;
             margin-top: 15px;
         }
 
-        .project-list li, .journal-list li {
+        .project-list li, .journal-list li, .exam-list li {
             padding: 12px 0;
             border-bottom: 1px solid #eee;
             display: flex;
@@ -371,14 +371,14 @@
             position: relative;
         }
 
-        .project-list a, .journal-list a {
+        .project-list a, .journal-list a, .exam-list a {
             color: var(--secondary);
             text-decoration: none;
             font-weight: 600;
             flex: 1;
         }
 
-        .project-list a:hover, .journal-list a:hover {
+        .project-list a:hover, .journal-list a:hover, .exam-list a:hover {
             text-decoration: underline;
         }
 
@@ -607,6 +607,7 @@
                     <li><a href="#" class="nav-link" data-page="books">Books</a></li>
                     <li><a href="#" class="nav-link" data-page="projects">Projects</a></li>
                     <li><a href="#" class="nav-link" data-page="journals">Journals</a></li>
+                    <li><a href="#" class="nav-link" data-page="exams">Exam Papers</a></li>
                     <li><button class="btn admin-return-btn" id="adminReturnBtn" style="display: none;">
                         <i class="fas fa-tachometer-alt"></i> Return to Dashboard
                     </button></li>
@@ -650,14 +651,14 @@
         <!-- Welcome Message -->
         <div class="welcome-message">
             <h2>Welcome to ECE Digital Library</h2>
-            <p>Access textbooks, research papers, projects, and journals for Electronics and Communication Engineering students.</p>
+            <p>Access textbooks, research papers, projects, journals, and TNPSC exam papers for Electronics and Communication Engineering students.</p>
         </div>
 
         <!-- Search Section -->
         <div class="search-section">
             <h2>Search Library Resources</h2>
             <div class="search-box">
-                <input type="text" id="mainSearch" placeholder="Search books, projects, journals...">
+                <input type="text" id="mainSearch" placeholder="Search books, projects, journals, exam papers...">
                 <button id="mainSearchBtn">
                     <i class="fas fa-search"></i> Search
                 </button>
@@ -679,6 +680,9 @@
                         <button class="btn" onclick="showSection('journals')">
                             <i class="fas fa-newspaper"></i> Access Journals
                         </button>
+                        <button class="btn" onclick="showSection('exams')">
+                            <i class="fas fa-file-pdf"></i> TNPSC Exam Papers
+                        </button>
                     </div>
                 </div>
                
@@ -695,9 +699,7 @@
                 <div class="card">
                     <h2><i class="fas fa-info-circle"></i> Library Information</h2>
                     <p><strong>Timings:</strong> 9:00 AM - 8:00 PM (Mon-Sat)</p>
-                    <p><strong>Location:</strong> ECE Department, 2nd Floor</p>
-                    <p><strong>Contact:</strong> ecelibrary@department.edu</p>
-                    <p><strong>Librarian:</strong> Dr. R. Sharma</p>
+                    <p><strong>Contact:</strong> hod.ece@shanmugha.edu.in</p>
                     <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
                         For admin access, contact the department head.
                     </p>
@@ -748,10 +750,29 @@
             <!-- Journals Section -->
             <div id="journals-section" class="hidden">
                 <div class="card">
-                    <h2><i class="fas fa-newspaper"></i> Journal Links</h2>
+                    <h2><i class="fas fa-newspaper"></i> Research Journals</h2>
                     <div id="journalsLoading" class="spinner"></div>
                     <ul class="journal-list" id="journalList" style="display: none;">
                         <!-- Journals will be populated from Firebase -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Exam Papers Section (TNPSC) -->
+            <div id="exams-section" class="hidden">
+                <div class="card">
+                    <h2><i class="fas fa-file-pdf"></i> TNPSC Exam Papers</h2>
+                    <div class="batch-selector" id="examYearSelector">
+                        <button class="batch-btn" data-year="2025">2025</button>
+                        <button class="batch-btn" data-year="2024">2024</button>
+                        <button class="batch-btn" data-year="2023">2023</button>
+                        <button class="batch-btn" data-year="2022">2022</button>
+                        <button class="batch-btn" data-year="2021">2021</button>
+                        <button class="batch-btn" data-year="2020">2020</button>
+                    </div>
+                    <div id="examsLoading" class="spinner"></div>
+                    <ul class="exam-list" id="examList" style="display: none;">
+                        <!-- Exam papers will be populated from Firebase -->
                     </ul>
                 </div>
             </div>
@@ -819,11 +840,13 @@
         // ============================================
 
         let currentPage = 1;
-        let booksPerPage = 24; // Increased from 12 to 24
+        let booksPerPage = 24;
         let books = [];
         let projects = {};
         let journals = [];
+        let exams = [];
         let currentBatch = '2026';
+        let currentExamYear = '2025';
         let hasMoreBooks = true;
         let lastBookDoc = null;
         let totalBooksCount = 0;
@@ -993,6 +1016,9 @@
                 case 'journals':
                     loadJournals();
                     break;
+                case 'exams':
+                    loadExams();
+                    break;
             }
         }
 
@@ -1030,11 +1056,16 @@
             const journalResults = journals.filter(journal => 
                 journal.name.toLowerCase().includes(query)
             );
+
+            const examResults = exams.filter(exam => 
+                exam.name.toLowerCase().includes(query) ||
+                (exam.year && exam.year.includes(query))
+            );
             
-            showSearchResults(query, bookResults, projectResults, journalResults);
+            showSearchResults(query, bookResults, projectResults, journalResults, examResults);
         }
 
-        function showSearchResults(query, books, projects, journals) {
+        function showSearchResults(query, books, projects, journals, exams) {
             navLinks.forEach(l => l.classList.remove('active'));
             document.querySelector('[data-page="home"]').classList.add('active');
             
@@ -1116,20 +1147,46 @@
                     </button>` : ''
                 }
             `;
+
+            const examsCard = document.createElement('div');
+            examsCard.className = 'card';
+            examsCard.innerHTML = `
+                <h2><i class="fas fa-file-pdf"></i> Exam Papers Found (${exams.length})</h2>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    ${exams.length > 0 ? 
+                        exams.slice(0, 5).map(exam => `
+                            <div style="padding: 10px; border-bottom: 1px solid #eee;">
+                                <a href="${exam.url}" target="_blank" style="color: var(--secondary); text-decoration: none;">
+                                    ${exam.name}
+                                </a>
+                                ${exam.year ? `<div style="font-size: 0.75rem; color: #666;">Year: ${exam.year}</div>` : ''}
+                            </div>
+                        `).join('') :
+                        '<p style="text-align: center; color: #666;">No exam papers found</p>'
+                    }
+                </div>
+                ${exams.length > 5 ? 
+                    `<button class="btn" onclick="showSection('exams')" style="margin-top: 15px; width: 100%;">
+                        View All ${exams.length} Exam Papers
+                    </button>` : ''
+                }
+            `;
             
             dashboard.innerHTML = '';
             dashboard.appendChild(booksCard);
             dashboard.appendChild(projectsCard);
             dashboard.appendChild(journalsCard);
+            dashboard.appendChild(examsCard);
             
             const summaryCard = document.createElement('div');
             summaryCard.className = 'card';
             summaryCard.innerHTML = `
                 <h2><i class="fas fa-search"></i> Search Results for "${query}"</h2>
-                <p>Found ${books.length + projects.length + journals.length} total results:</p>
+                <p>Found ${books.length + projects.length + journals.length + exams.length} total results:</p>
                 <p>• ${books.length} books</p>
                 <p>• ${projects.length} projects</p>
                 <p>• ${journals.length} journals</p>
+                <p>• ${exams.length} exam papers</p>
                 <button class="btn" onclick="location.reload()" style="margin-top: 15px;">
                     <i class="fas fa-home"></i> Back to Home
                 </button>
@@ -1147,6 +1204,7 @@
                     loadInitialBooksFromFirebase(),
                     loadProjectsFromFirebase(),
                     loadJournalsFromFirebase(),
+                    loadExamsFromFirebase(),
                     loadScrollingMessage(),
                     loadRecentBooks()
                 ]);
@@ -1284,6 +1342,24 @@
                 console.log(`Loaded ${journals.length} journals`);
             } catch (error) {
                 console.error("Error loading journals:", error);
+                throw error;
+            }
+        }
+
+        async function loadExamsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("exams")
+                    .orderBy("year", "desc")
+                    .get();
+                
+                exams = [];
+                querySnapshot.forEach(doc => {
+                    exams.push({ id: doc.id, ...doc.data() });
+                });
+                
+                console.log(`Loaded ${exams.length} exam papers`);
+            } catch (error) {
+                console.error("Error loading exams:", error);
                 throw error;
             }
         }
@@ -1476,6 +1552,34 @@
             journalList.style.display = 'block';
         }
 
+        function loadExams() {
+            const examList = document.getElementById('examList');
+            const loadingDiv = document.getElementById('examsLoading');
+            examList.innerHTML = '';
+           
+            // Filter by selected year if needed
+            let filteredExams = exams;
+            if (currentExamYear !== 'all') {
+                filteredExams = exams.filter(exam => exam.year === currentExamYear);
+            }
+           
+            if (filteredExams.length > 0) {
+                filteredExams.forEach(exam => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="${exam.url}" target="_blank">${exam.name}</a>
+                        ${exam.year ? `<span style="color: #666; font-size: 0.8rem;">${exam.year}</span>` : ''}
+                    `;
+                    examList.appendChild(li);
+                });
+            } else {
+                examList.innerHTML = '<li style="text-align: center; color: #666;">No exam papers available for this year</li>';
+            }
+            
+            loadingDiv.style.display = 'none';
+            examList.style.display = 'block';
+        }
+
         // ============================================
         // BATCH SELECTOR
         // ============================================
@@ -1489,8 +1593,19 @@
             });
         });
 
+        // Exam Year Selector
+        document.querySelectorAll('#examYearSelector .batch-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('#examYearSelector .batch-btn').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                currentExamYear = e.target.getAttribute('data-year');
+                loadExams();
+            });
+        });
+
         // Set first batch as active initially
         document.querySelector('.batch-btn[data-batch="2026"]').classList.add('active');
+        document.querySelector('#examYearSelector .batch-btn[data-year="2025"]').classList.add('active');
 
         // ============================================
         // KEYBOARD SHORTCUTS
