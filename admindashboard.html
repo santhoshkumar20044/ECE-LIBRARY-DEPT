@@ -1276,10 +1276,6 @@
                     <div class="stat-label">Journal Links</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-value" id="statsExamsCount">0</div>
-                    <div class="stat-label">Exam Papers</div>
-                </div>
-                <div class="stat-item">
                     <div class="stat-value" id="statsProjectsCount">0</div>
                     <div class="stat-label">Projects</div>
                 </div>
@@ -1323,20 +1319,6 @@
                     </div>
                 </div>
 
-                <!-- Delete Exams Only -->
-                <div class="delete-section">
-                    <h3><i class="fas fa-file-pdf"></i> Delete Exam Papers Only</h3>
-                    <div class="delete-option">
-                        <div>
-                            <strong>Delete All Exam Papers</strong>
-                            <div class="delete-info">This will delete all TNPSC exam paper links from the database</div>
-                        </div>
-                        <button class="btn btn-danger" id="deleteExamsBtn">
-                            <i class="fas fa-trash"></i> Delete <span id="examsCount">0</span> Exam Papers
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Delete Projects Only -->
                 <div class="delete-section">
                     <h3><i class="fas fa-project-diagram"></i> Delete Projects Only</h3>
@@ -1358,7 +1340,7 @@
                         <div>
                             <strong>Delete EVERYTHING</strong>
                             <div class="delete-info" style="color: var(--accent); font-weight: bold;">
-                                ⚠️ This will delete ALL books, journals, exam papers, projects, and messages!
+                                ⚠️ This will delete ALL books, journals, projects, and messages!
                             </div>
                         </div>
                         <button class="btn btn-danger" id="clearAllDataBtn" style="background: linear-gradient(to right, #c0392b, #a93226);">
@@ -1524,7 +1506,11 @@
                 <!-- Custom Batch List -->
                 <div class="custom-batch-list" id="customBatchList">
                     <!-- Custom batches will appear here -->
-                </div>  
+                </div>
+                <button class="btn" style="margin-top: 15px; width: 100%;" onclick="document.getElementById('pdfFile').click()">
+                    <i class="fas fa-upload"></i> Upload Project PDF
+                </button>
+                
                 <!-- Project List -->
                 <div style="margin-top: 20px;">
                     <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Current Projects</h3>
@@ -1534,9 +1520,9 @@
                 </div>
             </div>
 
-            <!-- Journal Links Management - Research Journals -->
+            <!-- Journal Links Management -->
             <div class="card">
-                <h2><i class="fas fa-link"></i> Journal Links Management - Research Journals</h2>
+                <h2><i class="fas fa-link"></i> Journal Links Management</h2>
                 <div class="form-group">
                     <label>Journal Name</label>
                     <input type="text" id="journalName" class="form-control" placeholder="Enter journal name">
@@ -1552,32 +1538,6 @@
                     <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Current Journals</h3>
                     <div id="adminJournalsList" style="max-height: 200px; overflow-y: auto;">
                         <!-- Admin journal list will be populated here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Journal Links Management - Exam Papers (TNPSC) -->
-            <div class="card">
-                <h2><i class="fas fa-file-pdf"></i> Competitive Exam Materials </h2>
-                <div class="form-group">
-                    <label>Exam Paper Name</label>
-                    <input type="text" id="examName" class="form-control" placeholder="Enter exam paper name (e.g., GATE,TNPSC Group 1 2023)">
-                </div>
-                <div class="form-group">
-                    <label>Exam Paper URL</label>
-                    <input type="url" id="examUrl" class="form-control" placeholder="https://example.com/tnpsc-paper">
-                </div>
-                <div class="form-group">
-                    <label>Year</label>
-                    <input type="text" id="examYear" class="form-control" placeholder="e.g., 2023, 2024">
-                </div>
-                <button class="btn" id="addExamLinkBtn"><i class="fas fa-plus-circle"></i> Add Exam Paper Link</button>
-                
-                <!-- Exam Papers List -->
-                <div style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 15px; color: var(--primary); font-size: 1rem;">Current Exam Papers</h3>
-                    <div id="adminExamsList" style="max-height: 200px; overflow-y: auto;">
-                        <!-- Admin exam papers list will be populated here -->
                     </div>
                 </div>
             </div>
@@ -1698,7 +1658,6 @@
         let books = [];
         let projects = {};
         let journals = [];
-        let exams = [];
         let adminCurrentPage = 1;
         let adminBooksPerPage = 10;
         let adminSearchQuery = '';
@@ -1745,20 +1704,24 @@
                     
                     allBooks = [...allBooks, ...batchBooks];
                     
+                    // Update progress notification
                     showNotification(`Loaded ${allBooks.length} books... (Batch ${batchCount})`, 'info');
                     
+                    // Check if we got less than batch size (end of data)
                     if (querySnapshot.size < batchSize) {
                         break;
                     }
                     
                     lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
                     
+                    // Small delay to prevent overwhelming
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
                 
                 books = allBooks;
                 console.log(`Total books loaded: ${books.length}`);
                 
+                // Update stats
                 updateStats();
                 
                 return books;
@@ -1769,38 +1732,97 @@
             }
         }
 
-        // Load journals
-        async function loadJournalsFromFirebase() {
+        // Load books count only (faster)
+        async function getBooksCount() {
             try {
-                const querySnapshot = await db.collection("journals")
-                    .orderBy("name")
-                    .get();
-                
-                journals = [];
-                querySnapshot.forEach(doc => {
-                    journals.push({ id: doc.id, ...doc.data() });
-                });
-                console.log(`Journals loaded: ${journals.length}`);
+                // Try to get count from metadata first
+                const booksRef = db.collection("books");
+                const snapshot = await booksRef.count().get();
+                return snapshot.data().count;
             } catch (error) {
-                console.error("Error loading journals:", error);
-                throw error;
+                console.error("Error getting count:", error);
+                // Fallback to loading all
+                await loadBooksFromFirebase();
+                return books.length;
             }
         }
 
-        // Load exam papers
-        async function loadExamsFromFirebase() {
+        // Enhanced batch import for large Excel files
+        async function importBooksBatch(bookDataArray, batchSize = 200) {
             try {
-                const querySnapshot = await db.collection("exams")
-                    .orderBy("year", "desc")
-                    .get();
+                const totalBooks = bookDataArray.length;
+                let successCount = 0;
+                let failedCount = 0;
                 
-                exams = [];
-                querySnapshot.forEach(doc => {
-                    exams.push({ id: doc.id, ...doc.data() });
-                });
-                console.log(`Exam papers loaded: ${exams.length}`);
+                // Process in batches
+                for (let i = 0; i < totalBooks; i += batchSize) {
+                    const batch = bookDataArray.slice(i, i + batchSize);
+                    const batchNumber = Math.floor(i / batchSize) + 1;
+                    const totalBatches = Math.ceil(totalBooks / batchSize);
+                    
+                    // Update progress
+                    const progress = Math.round((i / totalBooks) * 100);
+                    document.getElementById('uploadProgressBar').style.width = `${progress}%`;
+                    document.getElementById('uploadProgressBar').textContent = `${progress}%`;
+                    
+                    // Update stats
+                    document.getElementById('processedCount').textContent = i + batch.length;
+                    document.getElementById('remainingCount').textContent = totalBooks - (i + batch.length);
+                    
+                    showNotification(`Processing batch ${batchNumber}/${totalBatches}...`, 'info');
+                    
+                    // Create batch write
+                    const batchWrite = db.batch();
+                    const booksCollection = db.collection("books");
+                    
+                    // Add each book to batch
+                    batch.forEach(bookData => {
+                        const docRef = booksCollection.doc(); // Auto-generated ID
+                        const bookWithMetadata = {
+                            ...bookData,
+                            addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                            addedBy: auth.currentUser.email,
+                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                            importedFromExcel: true,
+                            importDate: new Date().toISOString()
+                        };
+                        batchWrite.set(docRef, bookWithMetadata);
+                    });
+                    
+                    // Commit batch
+                    try {
+                        await batchWrite.commit();
+                        successCount += batch.length;
+                        document.getElementById('successCount').textContent = successCount;
+                    } catch (batchError) {
+                        console.error(`Error in batch ${batchNumber}:`, batchError);
+                        failedCount += batch.length;
+                        document.getElementById('failedCount').textContent = failedCount;
+                        
+                        // Fallback to individual writes
+                        for (const bookData of batch) {
+                            try {
+                                await db.collection("books").add({
+                                    ...bookData,
+                                    addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                                    addedBy: auth.currentUser.email,
+                                    importedFromExcel: true
+                                });
+                                successCount++;
+                            } catch (individualError) {
+                                failedCount++;
+                                console.error("Individual book error:", individualError);
+                            }
+                        }
+                    }
+                    
+                    // Small delay to prevent rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+                
+                return { successCount, failedCount };
             } catch (error) {
-                console.error("Error loading exams:", error);
+                console.error("Batch import error:", error);
                 throw error;
             }
         }
@@ -1817,6 +1839,7 @@
                     projects[batch].push({ id: doc.id, ...project });
                 });
                 
+                // Add custom batches from projects
                 querySnapshot.forEach(doc => {
                     const project = doc.data();
                     if (project.batch && !customBatches.includes(project.batch)) {
@@ -1833,6 +1856,23 @@
                 
             } catch (error) {
                 console.error("Error loading projects:", error);
+                throw error;
+            }
+        }
+
+        // Load journals
+        async function loadJournalsFromFirebase() {
+            try {
+                const querySnapshot = await db.collection("journals")
+                    .orderBy("name")
+                    .get();
+                
+                journals = [];
+                querySnapshot.forEach(doc => {
+                    journals.push({ id: doc.id, ...doc.data() });
+                });
+            } catch (error) {
+                console.error("Error loading journals:", error);
                 throw error;
             }
         }
@@ -1869,12 +1909,14 @@
             const customBatchList = document.getElementById('customBatchList');
             const projectBatchSelect = document.getElementById('projectBatch');
             
+            // Clear existing custom batches from select
             Array.from(projectBatchSelect.options).forEach(option => {
                 if (option.value === 'custom') {
                     // Keep only the "Add Custom Batch" option
                 }
             });
             
+            // Add custom batches to select dropdown
             customBatches.forEach(batch => {
                 const optionExists = Array.from(projectBatchSelect.options).some(
                     opt => opt.value === batch
@@ -1888,6 +1930,7 @@
                 }
             });
             
+            // Render batch tags
             customBatchList.innerHTML = '';
             customBatches.forEach(batch => {
                 if (batch !== 'custom') {
@@ -1956,23 +1999,24 @@
                 showNotification('Loading dashboard data...', 'info');
                 updateDbStatus(true);
                 
+                // Load all data in parallel
                 await Promise.all([
                     loadBooksFromFirebase(),
                     loadProjectsFromFirebase(),
                     loadJournalsFromFirebase(),
-                    loadExamsFromFirebase(),
                     loadScrollingMessage()
                 ]);
                 
+                // Update UI
                 loadAdminBooksList();
                 loadAdminProjectsList();
                 loadAdminJournalsList();
-                loadAdminExamsList();
                 updateDeleteCounts();
                 updateStats();
                 
-                showNotification(`✅ Dashboard loaded! ${books.length} books, ${journals.length} journals, ${exams.length} exam papers`, 'success');
+                showNotification(`✅ Dashboard loaded! ${books.length} books, ${journals.length} journals`, 'success');
                 
+                // Update last updated time
                 document.getElementById('statsLastUpdated').textContent = 
                     new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 
@@ -1997,13 +2041,11 @@
         function updateDeleteCounts() {
             document.getElementById('booksCount').textContent = books.length;
             document.getElementById('journalsCount').textContent = journals.length;
-            document.getElementById('examsCount').textContent = exams.length;
         }
 
         function updateStats() {
             document.getElementById('statsBooksCount').textContent = books.length;
             document.getElementById('statsJournalsCount').textContent = journals.length;
-            document.getElementById('statsExamsCount').textContent = exams.length;
             document.getElementById('statsProjectsCount').textContent = 
                 Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
             
@@ -2013,7 +2055,7 @@
         }
 
         // ============================================
-        // EXCEL IMPORT FUNCTIONS
+        // EXCEL IMPORT ENHANCED FOR 2000+ BOOKS
         // ============================================
 
         document.getElementById('excelFile').addEventListener('change', async function(e) {
@@ -2029,6 +2071,7 @@
             uploadProgressBar.style.width = '0%';
             uploadProgressBar.textContent = '0%';
             
+            // Reset stats
             document.getElementById('processedCount').textContent = '0';
             document.getElementById('successCount').textContent = '0';
             document.getElementById('failedCount').textContent = '0';
@@ -2057,6 +2100,7 @@
 
                     showNotification(`Found ${rows.length} rows in Excel`, 'info');
 
+                    // Validate required columns
                     const firstRow = rows[0];
                     const hasTitle = firstRow.Title || firstRow.title || firstRow['Book Title'] || firstRow['Book Title'];
                     if (!hasTitle) {
@@ -2066,12 +2110,14 @@
                         return;
                     }
 
+                    // Process data
                     const bookDataArray = [];
                     let validRows = 0;
                     
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
                         
+                        // Extract data
                         const title = String(
                             row.Title || 
                             row.title || 
@@ -2080,7 +2126,7 @@
                             ''
                         ).trim();
                         
-                        if (!title) continue;
+                        if (!title) continue; // Skip rows without title
                         
                         const author = String(
                             row.Author || 
@@ -2133,10 +2179,12 @@
                     showNotification(`Processing ${validRows} valid books...`, 'info');
                     document.getElementById('remainingCount').textContent = validRows;
 
+                    // Clear existing books if replace mode
                     if (importMode === 'replace' && books.length > 0) {
                         const confirmation = confirm(`Replace ${books.length} existing books with ${validRows} new books?`);
                         if (confirmation) {
                             showNotification('Clearing existing books...', 'info');
+                            // Delete in batches
                             const deleteBatchSize = 500;
                             for (let i = 0; i < books.length; i += deleteBatchSize) {
                                 const batch = db.batch();
@@ -2157,21 +2205,26 @@
                         }
                     }
 
+                    // Import books in batches
                     const result = await importBooksBatch(bookDataArray, batchSize);
                     
+                    // Final progress
                     uploadProgressBar.style.width = '100%';
                     uploadProgressBar.textContent = '100%';
                     
+                    // Reload books and update UI
                     await loadBooksFromFirebase();
                     loadAdminBooksList();
                     updateDeleteCounts();
                     updateStats();
                     
+                    // Hide progress bars
                     setTimeout(() => {
                         uploadProgress.style.display = 'none';
                         uploadStats.style.display = 'none';
                     }, 2000);
                     
+                    // Show final results
                     showNotification(`✅ Import Complete!\n\n` +
                           `• Total rows processed: ${rows.length}\n` +
                           `• Valid books: ${validRows}\n` +
@@ -2196,77 +2249,6 @@
             reader.readAsArrayBuffer(file);
             e.target.value = '';
         });
-
-        async function importBooksBatch(bookDataArray, batchSize = 200) {
-            try {
-                const totalBooks = bookDataArray.length;
-                let successCount = 0;
-                let failedCount = 0;
-                
-                for (let i = 0; i < totalBooks; i += batchSize) {
-                    const batch = bookDataArray.slice(i, i + batchSize);
-                    const batchNumber = Math.floor(i / batchSize) + 1;
-                    const totalBatches = Math.ceil(totalBooks / batchSize);
-                    
-                    const progress = Math.round((i / totalBooks) * 100);
-                    document.getElementById('uploadProgressBar').style.width = `${progress}%`;
-                    document.getElementById('uploadProgressBar').textContent = `${progress}%`;
-                    
-                    document.getElementById('processedCount').textContent = i + batch.length;
-                    document.getElementById('remainingCount').textContent = totalBooks - (i + batch.length);
-                    
-                    showNotification(`Processing batch ${batchNumber}/${totalBatches}...`, 'info');
-                    
-                    const batchWrite = db.batch();
-                    const booksCollection = db.collection("books");
-                    
-                    batch.forEach(bookData => {
-                        const docRef = booksCollection.doc();
-                        const bookWithMetadata = {
-                            ...bookData,
-                            addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                            addedBy: auth.currentUser.email,
-                            lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
-                            importedFromExcel: true,
-                            importDate: new Date().toISOString()
-                        };
-                        batchWrite.set(docRef, bookWithMetadata);
-                    });
-                    
-                    try {
-                        await batchWrite.commit();
-                        successCount += batch.length;
-                        document.getElementById('successCount').textContent = successCount;
-                    } catch (batchError) {
-                        console.error(`Error in batch ${batchNumber}:`, batchError);
-                        failedCount += batch.length;
-                        document.getElementById('failedCount').textContent = failedCount;
-                        
-                        for (const bookData of batch) {
-                            try {
-                                await db.collection("books").add({
-                                    ...bookData,
-                                    addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                                    addedBy: auth.currentUser.email,
-                                    importedFromExcel: true
-                                });
-                                successCount++;
-                            } catch (individualError) {
-                                failedCount++;
-                                console.error("Individual book error:", individualError);
-                            }
-                        }
-                    }
-                    
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
-                
-                return { successCount, failedCount };
-            } catch (error) {
-                console.error("Batch import error:", error);
-                throw error;
-            }
-        }
 
         // Download sample Excel template
         document.getElementById('downloadSampleBtn').addEventListener('click', function() {
@@ -2332,6 +2314,7 @@
                 try {
                     showNotification(`Deleting ${books.length} books...`, 'info');
                     
+                    // Delete in batches to avoid timeout
                     const batchSize = 500;
                     for (let i = 0; i < books.length; i += batchSize) {
                         const batch = db.batch();
@@ -2342,6 +2325,7 @@
                         });
                         await batch.commit();
                         
+                        // Update progress
                         const progress = Math.round((Math.min(i + batchSize, books.length) / books.length) * 100);
                         showNotification(`Deleting... ${progress}% complete`, 'info');
                         await new Promise(resolve => setTimeout(resolve, 300));
@@ -2393,40 +2377,6 @@
                 }
             } else {
                 showNotification('Journal deletion cancelled', 'info');
-            }
-        }
-
-        async function deleteExamsOnly() {
-            if (exams.length === 0) {
-                showNotification('No exam papers to delete!', 'warning');
-                return;
-            }
-            
-            const confirmation = prompt(`⚠️ DELETE ALL ${exams.length} EXAM PAPER LINKS?\n\nType "DELETE ${exams.length} EXAMS" to confirm`);
-            
-            if (confirmation === `DELETE ${exams.length} EXAMS`) {
-                try {
-                    showNotification(`Deleting ${exams.length} exam papers...`, 'info');
-                    
-                    const batch = db.batch();
-                    exams.forEach(exam => {
-                        const docRef = db.collection("exams").doc(exam.id);
-                        batch.delete(docRef);
-                    });
-                    await batch.commit();
-                    
-                    await loadExamsFromFirebase();
-                    loadAdminExamsList();
-                    updateDeleteCounts();
-                    updateStats();
-                    
-                    showNotification(`✅ Successfully deleted ${exams.length} exam papers!`, 'success');
-                } catch (error) {
-                    console.error('Error deleting exams:', error);
-                    showNotification('❌ Failed to delete exams', 'error');
-                }
-            } else {
-                showNotification('Exam paper deletion cancelled', 'info');
             }
         }
 
@@ -2483,9 +2433,8 @@
         async function clearAllData() {
             const totalBooks = books.length;
             const totalJournals = journals.length;
-            const totalExams = exams.length;
             const totalProjects = Object.values(projects).reduce((sum, arr) => sum + arr.length, 0);
-            const totalItems = totalBooks + totalJournals + totalExams + totalProjects;
+            const totalItems = totalBooks + totalJournals + totalProjects;
             
             if (totalItems === 0) {
                 showNotification('No data to clear!', 'warning');
@@ -2496,7 +2445,6 @@
                    `This will delete:\n` +
                    `• ${totalBooks} books\n` +
                    `• ${totalJournals} journals\n` +
-                   `• ${totalExams} exam papers\n` +
                    `• ${totalProjects} projects\n` +
                    `• Scrolling message\n\n` +
                    `Type "NUKE ${totalItems} ITEMS" to confirm`);
@@ -2505,6 +2453,7 @@
                 try {
                     showNotification('Deleting ALL data...', 'info');
                     
+                    // Delete all books in batches
                     if (totalBooks > 0) {
                         const deleteBatchSize = 500;
                         for (let i = 0; i < books.length; i += deleteBatchSize) {
@@ -2519,6 +2468,7 @@
                         }
                     }
                     
+                    // Delete all journals
                     if (totalJournals > 0) {
                         const journalsBatch = db.batch();
                         journals.forEach(journal => {
@@ -2528,15 +2478,7 @@
                         await journalsBatch.commit();
                     }
                     
-                    if (totalExams > 0) {
-                        const examsBatch = db.batch();
-                        exams.forEach(exam => {
-                            const docRef = db.collection("exams").doc(exam.id);
-                            examsBatch.delete(docRef);
-                        });
-                        await examsBatch.commit();
-                    }
-                    
+                    // Delete all projects
                     if (totalProjects > 0) {
                         const projectsBatch = db.batch();
                         Object.values(projects).forEach(batchProjects => {
@@ -2548,10 +2490,12 @@
                         await projectsBatch.commit();
                     }
                     
+                    // Clear custom batches
                     customBatches = [];
                     saveCustomBatches();
                     renderCustomBatches();
                     
+                    // Clear scrolling message
                     await db.collection("settings").doc("scrolling_message").set({
                         message: "📚 DEPARTMENT OF ELECTRONICS AND COMMUNICATION ENGINEERING DIGITAL LIBRARY",
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -2635,7 +2579,6 @@
         const refreshBooksBtn = document.getElementById('refreshBooksBtn');
         const deleteBooksBtn = document.getElementById('deleteBooksBtn');
         const deleteJournalsBtn = document.getElementById('deleteJournalsBtn');
-        const deleteExamsBtn = document.getElementById('deleteExamsBtn');
         const deleteProjectsByBatchBtn = document.getElementById('deleteProjectsByBatchBtn');
         const clearAllDataBtn = document.getElementById('clearAllDataBtn');
         const confirmDeleteProjects = document.getElementById('confirmDeleteProjects');
@@ -2670,9 +2613,6 @@
 
         // Delete journals only
         deleteJournalsBtn.addEventListener('click', deleteJournalsOnly);
-
-        // Delete exams only
-        deleteExamsBtn.addEventListener('click', deleteExamsOnly);
 
         // Delete projects by batch
         deleteProjectsByBatchBtn.addEventListener('click', deleteProjectsByBatch);
@@ -2762,7 +2702,6 @@
         const addBookBtn = document.getElementById('addBookBtn');
         const updateBookBtn = document.getElementById('updateBookBtn');
         const addJournalLinkBtn = document.getElementById('addJournalLinkBtn');
-        const addExamLinkBtn = document.getElementById('addExamLinkBtn');
         const exportBooksBtn = document.getElementById('exportBooksBtn');
         const editBookModal = document.getElementById('editBookModal');
         const closeEditModal = document.getElementById('closeEditModal');
@@ -2889,50 +2828,9 @@
                     
                     document.getElementById('journalName').value = '';
                     document.getElementById('journalUrl').value = '';
-                    
-                    showNotification('Journal link added successfully!', 'success');
                 } catch (error) {
                     console.error('Error adding journal:', error);
-                    showNotification('Failed to add journal link', 'error');
                 }
-            } else {
-                showNotification('Please enter journal name and URL!', 'warning');
-            }
-        });
-
-        // Add exam paper link
-        addExamLinkBtn.addEventListener('click', async () => {
-            const name = document.getElementById('examName').value;
-            const url = document.getElementById('examUrl').value;
-            const year = document.getElementById('examYear').value;
-           
-            if (name && url) {
-                try {
-                    const examData = {
-                        name: name,
-                        url: url,
-                        year: year || new Date().getFullYear().toString(),
-                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        addedBy: auth.currentUser.email
-                    };
-                    
-                    await db.collection("exams").add(examData);
-                    await loadExamsFromFirebase();
-                    loadAdminExamsList();
-                    updateDeleteCounts();
-                    updateStats();
-                    
-                    document.getElementById('examName').value = '';
-                    document.getElementById('examUrl').value = '';
-                    document.getElementById('examYear').value = '';
-                    
-                    showNotification('Exam paper link added successfully!', 'success');
-                } catch (error) {
-                    console.error('Error adding exam paper:', error);
-                    showNotification('Failed to add exam paper link', 'error');
-                }
-            } else {
-                showNotification('Please enter exam paper name and URL!', 'warning');
             }
         });
 
@@ -3231,41 +3129,6 @@
             });
         }
 
-        function loadAdminExamsList() {
-            const adminExamsList = document.getElementById('adminExamsList');
-            adminExamsList.innerHTML = '';
-           
-            if (exams.length === 0) {
-                adminExamsList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No exam papers available</p>';
-                return;
-            }
-           
-            exams.forEach(exam => {
-                const examItem = document.createElement('div');
-                examItem.style.padding = '12px';
-                examItem.style.borderBottom = '1px solid #eee';
-                examItem.style.display = 'flex';
-                examItem.style.justifyContent = 'space-between';
-                examItem.style.alignItems = 'center';
-                
-                examItem.innerHTML = `
-                    <div style="flex: 1; min-width: 0;">
-                        <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">${exam.name}</strong>
-                        <div style="font-size: 0.8rem; color: #666; word-break: break-all;">
-                            ${exam.url}
-                        </div>
-                        ${exam.year ? `<div style="font-size: 0.75rem; color: #666; margin-top: 3px;">Year: ${exam.year}</div>` : ''}
-                    </div>
-                    <div style="margin-left: 10px;">
-                        <button class="action-btn delete-btn" onclick="deleteSingleExam('${exam.id}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                adminExamsList.appendChild(examItem);
-            });
-        }
-
         // ============================================
         // SINGLE ITEM DELETE FUNCTIONS
         // ============================================
@@ -3312,22 +3175,6 @@
                 } catch (error) {
                     console.error('Error deleting journal:', error);
                     showNotification('Failed to delete journal', 'error');
-                }
-            }
-        }
-
-        async function deleteSingleExam(examId) {
-            if (confirm('Are you sure you want to delete this exam paper?')) {
-                try {
-                    await db.collection("exams").doc(examId).delete();
-                    await loadExamsFromFirebase();
-                    loadAdminExamsList();
-                    updateDeleteCounts();
-                    updateStats();
-                    showNotification('Exam paper deleted successfully!', 'success');
-                } catch (error) {
-                    console.error('Error deleting exam:', error);
-                    showNotification('Failed to delete exam paper', 'error');
                 }
             }
         }
@@ -3486,9 +3333,6 @@
         
         console.log('Enhanced Admin dashboard loaded successfully');
         console.log('Supports 2000+ books import');
-        console.log('Two journal cards: Research Journals and Exam Papers (TNPSC)');
     </script>
 </body>
 </html>
-
-
