@@ -1486,7 +1486,7 @@
                 </div>
             </div>
 
-            <!-- UPDATED: Project Management with Link Button -->
+            <!-- FIXED: Project Management with only Title and Year -->
             <div class="card">
                 <h2><i class="fas fa-project-diagram"></i> Project Management</h2>
                 <div class="form-group">
@@ -1494,9 +1494,10 @@
                     <input type="text" id="projectTitle" class="form-control" placeholder="Enter project title">
                 </div>
                 <div class="form-group">
-                    <label>Project Link/URL</label>
-                    <input type="url" id="projectUrl" class="form-control" placeholder="https://example.com/project.pdf">
+                    <label>Project Year</label>
+                    <input type="number" id="projectYear" class="form-control" placeholder="Enter project year" min="2000" max="2030">
                 </div>
+                
                 <!-- Batch Management -->
                 <div class="form-group">
                     <label>Select Batch</label>
@@ -1529,9 +1530,9 @@
                     <!-- Custom batches will appear here -->
                 </div>
                 
-                <!-- Add Project Link Button -->
-                <button class="btn btn-success" id="addProjectLinkBtn" style="margin-top: 15px; width: 100%;">
-                    <i class="fas fa-link"></i> Add Project Link
+                <!-- Add Project Button -->
+                <button class="btn btn-success" id="addProjectBtn" style="margin-top: 15px; width: 100%;">
+                    <i class="fas fa-plus-circle"></i> Add Project
                 </button>
                 
                 <!-- Project List -->
@@ -1725,7 +1726,7 @@
                 let allBooks = [];
                 let lastDoc = null;
                 let batchCount = 0;
-                const batchSize = 500; // Firestore max per query
+                const batchSize = 500;
                 
                 while (true) {
                     let query = db.collection("books")
@@ -1814,7 +1815,7 @@
             }
         }
 
-        // Load projects
+        // FIXED: Load projects with proper handling
         async function loadProjectsFromFirebase() {
             try {
                 const querySnapshot = await db.collection("projects").get();
@@ -3008,25 +3009,19 @@
         });
 
         // ============================================
-        // NEW: ADD PROJECT LINK BUTTON
+        // FIXED: ADD PROJECT BUTTON (NO LINK REQUIRED)
         // ============================================
 
-        const addProjectLinkBtn = document.getElementById('addProjectLinkBtn');
+        const addProjectBtn = document.getElementById('addProjectBtn');
         
-        addProjectLinkBtn.addEventListener('click', async () => {
+        addProjectBtn.addEventListener('click', async () => {
             const title = document.getElementById('projectTitle').value;
-            const url = document.getElementById('projectUrl').value;
             const year = document.getElementById('projectYear').value;
             const batchSelect = document.getElementById('projectBatch');
             const batch = batchSelect.value;
             
             if (!title) {
                 showNotification('Please enter project title!', 'warning');
-                return;
-            }
-            
-            if (!url) {
-                showNotification('Please enter project URL/link!', 'warning');
                 return;
             }
             
@@ -3043,12 +3038,10 @@
             try {
                 const projectData = {
                     title: title,
-                    url: url,
                     year: parseInt(year),
                     batch: batch,
                     addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                    addedBy: auth.currentUser.email,
-                    isCustomBatch: customBatches.includes(batch)
+                    addedBy: auth.currentUser.email
                 };
                 
                 await db.collection("projects").add(projectData);
@@ -3059,15 +3052,14 @@
                 
                 // Clear form
                 document.getElementById('projectTitle').value = '';
-                document.getElementById('projectUrl').value = '';
                 document.getElementById('projectYear').value = '';
                 batchSelect.value = '2026';
                 document.getElementById('customBatchSection').style.display = 'none';
                 
-                showNotification('Project link added successfully!', 'success');
+                showNotification('Project added successfully!', 'success');
             } catch (error) {
-                console.error('Error adding project link:', error);
-                showNotification('Failed to add project link', 'error');
+                console.error('Error adding project:', error);
+                showNotification('Failed to add project', 'error');
             }
         });
 
@@ -3225,6 +3217,7 @@
             }
         }
 
+        // FIXED: Load admin projects list without URL
         function loadAdminProjectsList() {
             const adminProjectsList = document.getElementById('adminProjectsList');
             adminProjectsList.innerHTML = '';
@@ -3245,6 +3238,12 @@
                 return;
             }
             
+            // Sort projects by year (descending) and then by title
+            allProjects.sort((a, b) => {
+                if (a.year !== b.year) return (b.year || 0) - (a.year || 0);
+                return (a.title || '').localeCompare(b.title || '');
+            });
+            
             allProjects.forEach(project => {
                 const projectItem = document.createElement('div');
                 projectItem.style.padding = '12px';
@@ -3258,11 +3257,6 @@
                         <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">${project.title}</strong>
                         <div style="font-size: 0.8rem; color: #666;">
                             Batch: ${project.batch} | Year: ${project.year || 'N/A'}
-                        </div>
-                        <div style="font-size: 0.75rem; color: #3498db; word-break: break-all;">
-                            <a href="${project.url}" target="_blank" style="color: #3498db; text-decoration: none;">
-                                ${project.url ? project.url.substring(0, 50) + '...' : ''}
-                            </a>
                         </div>
                     </div>
                     <div style="margin-left: 10px;">
@@ -3498,9 +3492,8 @@
 
         loadDashboardData();
         
-        console.log('Enhanced Admin dashboard loaded successfully');
-        console.log('Supports 2000+ books import');
-        console.log('Updated Project Management with Link button');
+        console.log('Admin dashboard loaded successfully');
+        console.log('Project Management - Only Title, Year, and Batch');
     </script>
 </body>
 </html>
