@@ -1486,12 +1486,20 @@
                 </div>
             </div>
 
-            <!-- Project Management -->
+            <!-- UPDATED: Project Management with Link Button -->
             <div class="card">
-                <h2><i class="fas fa-file-pdf"></i> Project Management</h2>
+                <h2><i class="fas fa-project-diagram"></i> Project Management</h2>
                 <div class="form-group">
                     <label>Project Title</label>
                     <input type="text" id="projectTitle" class="form-control" placeholder="Enter project title">
+                </div>
+                <div class="form-group">
+                    <label>Project Link/URL</label>
+                    <input type="url" id="projectUrl" class="form-control" placeholder="https://example.com/project.pdf">
+                </div>
+                <div class="form-group">
+                    <label>Project Year</label>
+                    <input type="number" id="projectYear" class="form-control" placeholder="Enter project year" min="2000" max="2030">
                 </div>
                 
                 <!-- Batch Management -->
@@ -1525,8 +1533,10 @@
                 <div class="custom-batch-list" id="customBatchList">
                     <!-- Custom batches will appear here -->
                 </div>
-                <button class="btn" style="margin-top: 15px; width: 100%;" onclick="document.getElementById('pdfFile').click()">
-                    <i class="fas fa-upload"></i> Upload Project PDF
+                
+                <!-- Add Project Link Button -->
+                <button class="btn btn-success" id="addProjectLinkBtn" style="margin-top: 15px; width: 100%;">
+                    <i class="fas fa-link"></i> Add Project Link
                 </button>
                 
                 <!-- Project List -->
@@ -3003,6 +3013,70 @@
         });
 
         // ============================================
+        // NEW: ADD PROJECT LINK BUTTON
+        // ============================================
+
+        const addProjectLinkBtn = document.getElementById('addProjectLinkBtn');
+        
+        addProjectLinkBtn.addEventListener('click', async () => {
+            const title = document.getElementById('projectTitle').value;
+            const url = document.getElementById('projectUrl').value;
+            const year = document.getElementById('projectYear').value;
+            const batchSelect = document.getElementById('projectBatch');
+            const batch = batchSelect.value;
+            
+            if (!title) {
+                showNotification('Please enter project title!', 'warning');
+                return;
+            }
+            
+            if (!url) {
+                showNotification('Please enter project URL/link!', 'warning');
+                return;
+            }
+            
+            if (!year) {
+                showNotification('Please enter project year!', 'warning');
+                return;
+            }
+            
+            if (batch === 'custom') {
+                showNotification('Please select a valid batch or add one!', 'warning');
+                return;
+            }
+            
+            try {
+                const projectData = {
+                    title: title,
+                    url: url,
+                    year: parseInt(year),
+                    batch: batch,
+                    addedDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    addedBy: auth.currentUser.email,
+                    isCustomBatch: customBatches.includes(batch)
+                };
+                
+                await db.collection("projects").add(projectData);
+                await loadProjectsFromFirebase();
+                loadAdminProjectsList();
+                updateDeleteCounts();
+                updateStats();
+                
+                // Clear form
+                document.getElementById('projectTitle').value = '';
+                document.getElementById('projectUrl').value = '';
+                document.getElementById('projectYear').value = '';
+                batchSelect.value = '2026';
+                document.getElementById('customBatchSection').style.display = 'none';
+                
+                showNotification('Project link added successfully!', 'success');
+            } catch (error) {
+                console.error('Error adding project link:', error);
+                showNotification('Failed to add project link', 'error');
+            }
+        });
+
+        // ============================================
         // BOOK MANAGEMENT FUNCTIONS
         // ============================================
 
@@ -3188,7 +3262,12 @@
                     <div style="flex: 1; min-width: 0;">
                         <strong style="font-size: 0.95rem; display: block; margin-bottom: 3px;">${project.title}</strong>
                         <div style="font-size: 0.8rem; color: #666;">
-                            Batch: ${project.batch}
+                            Batch: ${project.batch} | Year: ${project.year || 'N/A'}
+                        </div>
+                        <div style="font-size: 0.75rem; color: #3498db; word-break: break-all;">
+                            <a href="${project.url}" target="_blank" style="color: #3498db; text-decoration: none;">
+                                ${project.url ? project.url.substring(0, 50) + '...' : ''}
+                            </a>
                         </div>
                     </div>
                     <div style="margin-left: 10px;">
@@ -3351,105 +3430,41 @@
         // FILE UPLOAD DRAG & DROP
         // ============================================
 
-        ['excelUpload', 'pdfUpload'].forEach(id => {
+        ['excelUpload'].forEach(id => {
             const el = document.getElementById(id);
-            el.addEventListener('click', () => {
-                const fileInput = document.getElementById(id.replace('Upload', 'File'));
-                fileInput.click();
-            });
-           
-            el.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                el.style.borderColor = 'var(--secondary)';
-                el.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
-            });
-           
-            el.addEventListener('dragleave', () => {
-                el.style.borderColor = '#ddd';
-                el.style.backgroundColor = '';
-            });
-           
-            el.addEventListener('drop', (e) => {
-                e.preventDefault();
-                el.style.borderColor = '#ddd';
-                el.style.backgroundColor = '';
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
+            if (el) {
+                el.addEventListener('click', () => {
                     const fileInput = document.getElementById(id.replace('Upload', 'File'));
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(files[0]);
-                    fileInput.files = dataTransfer.files;
+                    fileInput.click();
+                });
+               
+                el.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    el.style.borderColor = 'var(--secondary)';
+                    el.style.backgroundColor = 'rgba(52, 152, 219, 0.1)';
+                });
+               
+                el.addEventListener('dragleave', () => {
+                    el.style.borderColor = '#ddd';
+                    el.style.backgroundColor = '';
+                });
+               
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.style.borderColor = '#ddd';
+                    el.style.backgroundColor = '';
                     
-                    const event = new Event('change', { bubbles: true });
-                    fileInput.dispatchEvent(event);
-                }
-            });
-        });
-
-        // ============================================
-        // PDF UPLOAD HANDLER
-        // ============================================
-
-        document.getElementById('pdfFile').addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                const title = document.getElementById('projectTitle').value;
-                const batchSelect = document.getElementById('projectBatch');
-                const batch = batchSelect.value;
-                const file = e.target.files[0];
-                
-                if (!title) {
-                    showNotification('Please enter project title first', 'warning');
-                    e.target.value = '';
-                    return;
-                }
-                
-                if (batch === 'custom') {
-                    showNotification('Please select a valid batch or add one!', 'warning');
-                    e.target.value = '';
-                    return;
-                }
-                
-                if (!file.type === 'application/pdf') {
-                    showNotification('Please upload PDF files only', 'warning');
-                    e.target.value = '';
-                    return;
-                }
-                
-                try {
-                    const storageRef = storage.ref();
-                    const fileRef = storageRef.child(`projects/${batch}/${Date.now()}_${file.name}`);
-                    await fileRef.put(file);
-                    const fileUrl = await fileRef.getDownloadURL();
-                    
-                    const projectData = {
-                        title: title,
-                        batch: batch,
-                        fileUrl: fileUrl,
-                        fileName: file.name,
-                        addedDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        addedBy: auth.currentUser.email,
-                        fileSize: file.size,
-                        fileType: file.type,
-                        isCustomBatch: customBatches.includes(batch)
-                    };
-                    
-                    await db.collection("projects").add(projectData);
-                    await loadProjectsFromFirebase();
-                    loadAdminProjectsList();
-                    updateDeleteCounts();
-                    updateStats();
-                    
-                    document.getElementById('projectTitle').value = '';
-                    batchSelect.value = '2026';
-                    document.getElementById('customBatchSection').style.display = 'none';
-                    e.target.value = '';
-                    
-                    showNotification('Project uploaded successfully!', 'success');
-                } catch (error) {
-                    console.error('Error uploading project:', error);
-                    showNotification('Failed to upload project', 'error');
-                }
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const fileInput = document.getElementById(id.replace('Upload', 'File'));
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(files[0]);
+                        fileInput.files = dataTransfer.files;
+                        
+                        const event = new Event('change', { bubbles: true });
+                        fileInput.dispatchEvent(event);
+                    }
+                });
             }
         });
 
@@ -3490,8 +3505,7 @@
         
         console.log('Enhanced Admin dashboard loaded successfully');
         console.log('Supports 2000+ books import');
-        console.log('Two journal cards: Research Journals and Exam Papers (TNPSC)');
+        console.log('Updated Project Management with Link button');
     </script>
 </body>
 </html>
-
